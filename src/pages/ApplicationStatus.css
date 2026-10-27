@@ -1,0 +1,461 @@
+.application-status-page {
+    min-height: 100vh;
+    background: #f5f8fc;
+    padding: 45px 0 70px;
+}
+
+.application-status-container {
+    width: 92%;
+    max-width: 1150px;
+    margin: 0 auto;
+}
+
+/* =========================
+   HEADER
+========================= */
+
+.status-page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.status-page-header h1 {
+    margin: 0;
+    color: #174d78;
+    font-size: 38px;
+    font-weight: 650;
+}
+
+.status-page-header p {
+    margin: 9px 0 0;
+    color: #71869a;
+    font-size: 16px;
+}
+
+.dashboard-back-btn {
+    padding: 13px 21px;
+    border: 1px solid #d6e2ec;
+    background: #ffffff;
+    color: #174d78;
+    border-radius: 9px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.dashboard-back-btn:hover {
+    background: #174d78;
+    color: white;
+}
+
+/* =========================
+   CHECK STATUS CARD
+========================= */
+
+.check-status-card {
+    display: flex;
+    gap: 25px;
+    background: #ffffff;
+    border: 1px solid #dce6ef;
+    border-radius: 18px;
+    padding: 35px;
+    margin-bottom: 28px;
+    box-shadow: 0 7px 25px rgba(30, 70, 100, 0.06);
+}
+
+.check-status-icon {
+    width: 58px;
+    height: 58px;
+    min-width: 58px;
+    border-radius: 14px;
+    background: #eaf6fd;
+    color: #147bb1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 26px;
+    font-weight: 700;
+}
+
+.check-status-content {
+    flex: 1;
+}
+
+.check-status-content h2 {
+    margin: 0 0 8px;
+    color: #173f63;
+    font-size: 25px;
+}
+
+.check-status-content > p {
+    margin: 0 0 25px;
+    color: #71869a;
+    font-size: 14px;
+}
+
+/* =========================
+   FORM
+========================= */
+
+.status-check-form label {
+    display: block;
+    margin-bottom: 9px;
+    color: #36566e;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.status-input-row {
+    display: flex;
+    gap: 12px;
+}
+
+.status-input-row input {
+    flex: 1;
+    height: 50px;
+    padding: 0 15px;
+    border: 1px solid #d4e0e9;
+    border-radius: 9px;
+    outline: none;
+    background: #fbfcfe;
+    color: #294f69;
+    font-size: 14px;
+    transition: 0.2s ease;
+}
+
+.status-input-row input:focus {
+    border-color: #2485b9;
+    box-shadow: 0 0 0 3px rgba(36, 133, 185, 0.1);
+    background: #ffffff;
+}
+
+.status-input-row input::placeholder {
+    color: #9aabb8;
+}
+
+.status-input-row button {
+    min-width: 145px;
+    height: 50px;
+    padding: 0 20px;
+    border: none;
+    border-radius: 9px;
+    background: #17618f;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.status-input-row button:hover {
+    background: #124f76;
+}
+
+.status-input-row button:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+/* =========================
+   ERROR
+========================= */
+
+.status-error-message {
+    margin-top: 16px;
+    padding: 13px 15px;
+    border: 1px solid #ffd1d1;
+    border-radius: 8px;
+    background: #fff3f3;
+    color: #bd3636;
+    font-size: 13px;
+}
+
+/* =========================
+   SERVICE RESULT
+========================= */
+
+.status-service-card {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background: #ffffff;
+    border: 1px solid #dce6ef;
+    border-radius: 16px;
+    padding: 25px;
+    margin-bottom: 22px;
+    box-shadow: 0 5px 20px rgba(30, 70, 100, 0.05);
+}
+
+.service-status-icon {
+    width: 62px;
+    height: 62px;
+    min-width: 62px;
+    border-radius: 14px;
+    background: #edf7fd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 29px;
+}
+
+.service-status-info {
+    flex: 1;
+}
+
+.service-status-info span {
+    display: block;
+    color: #8195a5;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+}
+
+.service-status-info h2 {
+    margin: 0 0 6px;
+    color: #173f63;
+    font-size: 24px;
+}
+
+.service-status-info p {
+    margin: 0;
+    color: #8293a2;
+    font-size: 13px;
+}
+
+.service-status-info strong {
+    color: #385b73;
+}
+
+/* =========================
+   STATUS BADGES
+========================= */
+
+.application-status-badge {
+    padding: 9px 17px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.status-pending {
+    background: #fff4d9;
+    color: #a36b00;
+}
+
+.status-review {
+    background: #e8f1ff;
+    color: #2865b1;
+}
+
+.status-approved {
+    background: #e7f7ed;
+    color: #21834b;
+}
+
+.status-rejected {
+    background: #ffebeb;
+    color: #c0392b;
+}
+
+.status-completed {
+    background: #e5f7f5;
+    color: #14776d;
+}
+
+/* =========================
+   COMMON CARD
+========================= */
+
+.status-card {
+    background: #ffffff;
+    border: 1px solid #dce6ef;
+    border-radius: 16px;
+    padding: 29px;
+    margin-bottom: 22px;
+    box-shadow: 0 5px 20px rgba(30, 70, 100, 0.04);
+}
+
+.card-title {
+    margin-bottom: 25px;
+}
+
+.card-title h2 {
+    margin: 0;
+    color: #173f63;
+    font-size: 21px;
+}
+
+.card-title p {
+    margin: 8px 0 0;
+    color: #7a8d9d;
+    font-size: 14px;
+}
+
+/* =========================
+   PROGRESS
+========================= */
+
+.progress-step {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+}
+
+.progress-circle {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    border-radius: 50%;
+    border: 2px solid #d8e2ea;
+    background: #eef2f6;
+    color: #99a9b7;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 700;
+}
+
+.progress-circle.completed {
+    background: #17618f;
+    border-color: #17618f;
+    color: #ffffff;
+    box-shadow: 0 0 0 5px #e8f3f8;
+}
+
+.progress-content h3 {
+    margin: 2px 0 5px;
+    color: #284f6b;
+    font-size: 16px;
+}
+
+.progress-content p {
+    margin: 0;
+    color: #8193a2;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.progress-line {
+    width: 2px;
+    height: 30px;
+    margin-left: 18px;
+    background: #dbe4eb;
+}
+
+/* =========================
+   REJECTED
+========================= */
+
+.rejected-box {
+    margin-top: 22px;
+    padding: 16px;
+    background: #fff3f3;
+    border: 1px solid #ffd2d2;
+    border-radius: 9px;
+}
+
+.rejected-box strong {
+    display: block;
+    color: #bc3838;
+    margin-bottom: 5px;
+}
+
+.rejected-box p {
+    margin: 0;
+    color: #8f5555;
+    font-size: 13px;
+}
+
+/* =========================
+   INFORMATION
+========================= */
+
+.information-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 40px;
+}
+
+.info-item {
+    padding: 16px 0;
+    border-bottom: 1px solid #edf1f4;
+}
+
+.info-item.full-width {
+    grid-column: 1 / -1;
+}
+
+.info-item span {
+    display: block;
+    color: #8799a8;
+    font-size: 12px;
+    margin-bottom: 6px;
+}
+
+.info-item strong {
+    color: #294e69;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 700px) {
+
+    .application-status-page {
+        padding: 30px 0 50px;
+    }
+
+    .status-page-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .status-page-header h1 {
+        font-size: 30px;
+    }
+
+    .dashboard-back-btn {
+        width: 100%;
+    }
+
+    .check-status-card {
+        padding: 25px 20px;
+        flex-direction: column;
+    }
+
+    .status-input-row {
+        flex-direction: column;
+    }
+
+    .status-input-row button {
+        width: 100%;
+    }
+
+    .status-service-card {
+        flex-wrap: wrap;
+    }
+
+    .application-status-badge {
+        margin-left: 82px;
+    }
+
+    .status-card {
+        padding: 23px 20px;
+    }
+
+    .information-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .info-item.full-width {
+        grid-column: auto;
+    }
+}

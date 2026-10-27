@@ -1,0 +1,162 @@
+.reports-page {
+    min-height: 100vh;
+    background: #f5f7fb;
+    padding: 30px;
+}
+
+.reports-header {
+    max-width: 1200px;
+    margin: 0 auto 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+
+.reports-header h1 {
+    margin: 0 0 8px;
+    font-size: 32px;
+    color: #172033;
+}
+
+.reports-header p {
+    margin: 0;
+    color: #667085;
+}
+
+.back-button {
+    border: none;
+    background: #ffffff;
+    color: #344054;
+    padding: 12px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.back-button:hover {
+    background: #eef2ff;
+}
+
+.reports-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 0.8fr 1.2fr;
+    gap: 30px;
+}
+
+.reports-info,
+.reports-form-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.06);
+}
+
+.reports-info h2,
+.reports-form-card h2 {
+    margin-top: 0;
+    color: #172033;
+}
+
+.reports-info > p {
+    color: #667085;
+    line-height: 1.6;
+}
+
+.info-item {
+    display: flex;
+    gap: 15px;
+    margin-top: 25px;
+}
+
+.info-item span {
+    font-size: 28px;
+}
+
+.info-item strong {
+    color: #172033;
+}
+
+.info-item p {
+    margin: 5px 0 0;
+    color: #667085;
+    line-height: 1.5;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #344054;
+    font-weight: 600;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #d0d5dd;
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 15px;
+    outline: none;
+    font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.12);
+}
+
+.form-group textarea {
+    resize: vertical;
+}
+
+.submit-report-button {
+    width: 100%;
+    border: none;
+    border-radius: 8px;
+    padding: 14px;
+    background: #4f46e5;
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.submit-report-button:hover {
+    background: #4338ca;
+}
+
+.reports-message {
+    margin-bottom: 20px;
+    padding: 12px 15px;
+    border-radius: 8px;
+    background: #ecfdf3;
+    color: #027a48;
+    font-weight: 500;
+}
+
+@media (max-width: 800px) {
+    .reports-page {
+        padding: 20px;
+    }
+
+    .reports-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .reports-container {
+        grid-template-columns: 1fr;
+    }
+}
