@@ -230,7 +230,6 @@ const Dashboard = () => {
                 ====================================== */}
 
                 <nav className="citizen-nav">
-                    <button onClick={() => navigate("/feedback")}>Feedback</button>
 
                     <button
                         className="active"
@@ -296,6 +295,8 @@ const Dashboard = () => {
                     >
                         Notifications
                     </button>
+
+                    <button onClick={() => navigate("/feedback")}>Feedback</button>
 
                 </nav>
 
