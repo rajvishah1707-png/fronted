@@ -1,10 +1,13 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import "./Register.css";
 
 const Register = () => {
     const navigate = useNavigate();
+    const profileImageInputRef = useRef(null);
+    const [profileImage, setProfileImage] = useState("");
+    const [profileImageFile, setProfileImageFile] = useState(null);
 
     const [formData, setFormData] = useState({
         name: "",
@@ -31,6 +34,45 @@ const Register = () => {
 
         setError("");
         setSuccess("");
+    };
+
+    const handleProfileImageChange = (event) => {
+        const file = event.target.files?.[0];
+
+        if (!file) {
+            return;
+        }
+
+        if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+            setError("Profile photo must be JPG, PNG or WEBP.");
+            event.target.value = "";
+            return;
+        }
+
+        if (file.size > 5 * 1024 * 1024) {
+            setError("Profile photo must be smaller than 5 MB.");
+            event.target.value = "";
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = () => {
+            setProfileImage(reader.result);
+            setProfileImageFile(file);
+            setError("");
+        };
+        reader.onerror = () => {
+            setError("Unable to read the selected profile photo.");
+        };
+        reader.readAsDataURL(file);
+    };
+
+    const removeProfileImage = () => {
+        setProfileImage("");
+        setProfileImageFile(null);
+        if (profileImageInputRef.current) {
+            profileImageInputRef.current.value = "";
+        }
     };
 
     const handleSubmit = async (e) => {
@@ -101,25 +143,24 @@ const Register = () => {
         setLoading(true);
 
         try {
+            const registrationData = new FormData();
+            registrationData.append("name", name.trim());
+            registrationData.append("email", email.trim().toLowerCase());
+            registrationData.append("phone", phone.trim());
+            registrationData.append("address", address.trim());
+            registrationData.append("city", city.trim());
+            registrationData.append("pincode", pincode.trim());
+            registrationData.append("password", password);
+            registrationData.append("confirmPassword", confirmPassword);
+            if (profileImageFile) {
+                registrationData.append("profileImage", profileImageFile);
+            }
+
             const response = await fetch(
                 "https://backend-1df5.onrender.com/api/auth/register",
                 {
                     method: "POST",
-
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-
-                    body: JSON.stringify({
-                        name: name.trim(),
-                        email: email.trim().toLowerCase(),
-                        phone: phone.trim(),
-                        address: address.trim(),
-                        city: city.trim(),
-                        pincode: pincode.trim(),
-                        password,
-                        confirmPassword
-                    })
+                    body: registrationData
                 }
             );
 
@@ -171,6 +212,11 @@ const Register = () => {
                 password: "",
                 confirmPassword: ""
             });
+            setProfileImage("");
+            setProfileImageFile(null);
+            if (profileImageInputRef.current) {
+                profileImageInputRef.current.value = "";
+            }
 
             /* ==============================
                GO TO CITIZEN LOGIN
@@ -314,6 +360,44 @@ const Register = () => {
                     )}
 
                     <form onSubmit={handleSubmit}>
+
+                        <div className="form-group register-photo-group">
+                            <label htmlFor="register-profile-image">
+                                Profile Photo <span>(Optional)</span>
+                            </label>
+                            <div className="register-photo-picker">
+                                {profileImage ? (
+                                    <img
+                                        className="register-photo-preview"
+                                        src={profileImage}
+                                        alt="Selected profile preview"
+                                    />
+                                ) : (
+                                    <div className="register-photo-placeholder" aria-hidden="true">
+                                        👤
+                                    </div>
+                                )}
+                                <div className="register-photo-actions">
+                                    <input
+                                        ref={profileImageInputRef}
+                                        id="register-profile-image"
+                                        type="file"
+                                        accept="image/jpeg,image/png,image/webp"
+                                        onChange={handleProfileImageChange}
+                                    />
+                                    <small>JPG, PNG or WEBP. Maximum 5 MB.</small>
+                                    {profileImage && (
+                                        <button
+                                            type="button"
+                                            className="register-photo-remove"
+                                            onClick={removeProfileImage}
+                                        >
+                                            Remove photo
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
 
                         {/* NAME */}
 
