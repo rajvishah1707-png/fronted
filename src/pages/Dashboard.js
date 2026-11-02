@@ -29,6 +29,7 @@ const Dashboard = () => {
         }
 
         if (
+            image.startsWith("data:image/") ||
             image.startsWith("http://") ||
             image.startsWith("https://")
         ) {
