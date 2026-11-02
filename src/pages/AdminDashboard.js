@@ -1,3 +1,5 @@
+import AdminPaymentSummary from "../components/AdminPaymentSummary";
+import { adminFetch } from "../utils/adminApi";
 import React, {
     useCallback,
     useEffect,
@@ -19,6 +21,7 @@ function AdminDashboard() {
     // =====================================================
 
     const [admin, setAdmin] = useState({});
+    const [statsError, setStatsError] = useState("");
 
 
     // =====================================================
@@ -115,7 +118,7 @@ function AdminDashboard() {
 
 
                 const response =
-                    await fetch(
+                    await adminFetch(
                         "https://backend-1df5.onrender.com/api/admin/stats",
                         {
                             method: "GET",
@@ -137,6 +140,7 @@ function AdminDashboard() {
                     data.statistics
                 ) {
 
+                    setStatsError("");
                     setStatistics(
                         (previous) => ({
                             ...previous,
@@ -151,6 +155,7 @@ function AdminDashboard() {
 
                 } else {
 
+                    setStatsError(data.message || "Unable to load dashboard statistics");
                     console.error(
                         "Statistics error:",
                         data.message
@@ -160,6 +165,7 @@ function AdminDashboard() {
 
             } catch (error) {
 
+                setStatsError(error.message || "Unable to load dashboard statistics");
                 console.error(
                     "Dashboard statistics error:",
                     error
@@ -229,6 +235,7 @@ function AdminDashboard() {
 
     const handleLogout = () => {
 
+        localStorage.removeItem("adminToken");
         localStorage.removeItem(
             "admin"
         );
@@ -433,6 +440,9 @@ function AdminDashboard() {
 
                     </button>
 
+
+                    <button className="sidebar-nav-item" onClick={() => openPage("/admin/payments")}><span className="nav-icon">₹</span><span>Payments</span></button>
+                    <button className="sidebar-nav-item" onClick={() => openPage("/admin/digital-documents")}><span className="nav-icon">▤</span><span>Digital Documents</span></button>
 
                     <div className="nav-heading">
                         SYSTEM
@@ -709,6 +719,8 @@ function AdminDashboard() {
                 ================================================= */}
 
                 <main className="admin-main">
+                    <AdminPaymentSummary />
+                    {statsError && <p role="alert">{statsError}</p>}
 
 
                     {/* =================================================
@@ -1340,7 +1352,7 @@ function AdminDashboard() {
                                 </div>
 
 
-                                {/* Logged In Citizens */}
+                                {/* Citizens Who Have Logged In */}
 
                                 <div className="activity-item">
 
@@ -1351,7 +1363,7 @@ function AdminDashboard() {
                                     <div>
 
                                         <span>
-                                            Logged In Citizens
+                                            Citizens Who Have Logged In
                                         </span>
 
                                         <strong>

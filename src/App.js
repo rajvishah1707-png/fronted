@@ -1,3 +1,7 @@
+import Payments from "./pages/Payments";
+import AdminManagement from "./pages/AdminManagement";
+import Feedback from "./pages/Feedback";
+import ReportIssue from "./pages/ReportIssue";
 import React from "react";
 import {
     BrowserRouter as Router,
@@ -74,7 +78,7 @@ function AdminProtectedRoute({ children }) {
     const admin =
         localStorage.getItem("admin");
 
-    if (!adminLoggedIn || !admin) {
+    if (!adminLoggedIn || !admin || !localStorage.getItem("adminToken")) {
         return (
             <Navigate
                 to="/admin-login"
@@ -358,6 +362,15 @@ function App() {
                     }
                 />
 
+
+                <Route path="/payments" element={<ProtectedRoute><Payments /></ProtectedRoute>} />
+                <Route path="/feedback" element={<ProtectedRoute><Feedback /></ProtectedRoute>} />
+                <Route path="/report-issue" element={<ProtectedRoute><ReportIssue /></ProtectedRoute>} />
+                <Route path="/admin/categories" element={<AdminProtectedRoute><AdminManagement section="categories" /></AdminProtectedRoute>} />
+                <Route path="/admin/notifications" element={<AdminProtectedRoute><AdminManagement section="notifications" /></AdminProtectedRoute>} />
+                <Route path="/admin/feedback" element={<AdminProtectedRoute><AdminManagement section="feedback" /></AdminProtectedRoute>} />
+                <Route path="/admin/statistics" element={<AdminProtectedRoute><AdminManagement section="statistics" /></AdminProtectedRoute>} />
+                <Route path="/admin/payments" element={<AdminProtectedRoute><Payments isAdmin /></AdminProtectedRoute>} />
 
                 {/* =========================
                     FALLBACK

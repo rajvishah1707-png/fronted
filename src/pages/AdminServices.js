@@ -1,3 +1,4 @@
+import { API_URL, adminFetch } from "../utils/adminApi";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./AdminServices.css";
@@ -5,6 +6,13 @@ import "./AdminServices.css";
 function AdminServices() {
 
     const navigate = useNavigate();
+    const [categoryOptions, setCategoryOptions] = useState([]);
+    useEffect(() => {
+        adminFetch(`${API_URL}/api/admin/system/categories`).then(response => response.json())
+            .then(data => { if (data.success) setCategoryOptions(data.categories.map(item => item.name)); })
+            .catch(() => {});
+    }, []);
+
 
     const [services, setServices] = useState([]);
 
@@ -46,7 +54,7 @@ function AdminServices() {
             setLoading(true);
             setError("");
 
-            const response = await fetch(
+            const response = await adminFetch(
                 "https://backend-1df5.onrender.com/api/services/admin/all"
             );
 
@@ -282,7 +290,7 @@ function AdminServices() {
 
             if (editingService) {
 
-                response = await fetch(
+                response = await adminFetch(
                     `https://backend-1df5.onrender.com/api/services/${editingService._id}`,
                     {
                         method: "PUT",
@@ -307,7 +315,7 @@ function AdminServices() {
 
             else {
 
-                response = await fetch(
+                response = await adminFetch(
                     "https://backend-1df5.onrender.com/api/services",
                     {
                         method: "POST",
@@ -389,7 +397,7 @@ function AdminServices() {
         try {
 
             const response =
-                await fetch(
+                await adminFetch(
                     `https://backend-1df5.onrender.com/api/services/${service._id}`,
                     {
                         method: "DELETE"
@@ -446,7 +454,7 @@ function AdminServices() {
 
 
             const response =
-                await fetch(
+                await adminFetch(
                     `https://backend-1df5.onrender.com/api/services/${service._id}`,
                     {
                         method: "PUT",
@@ -916,8 +924,10 @@ function AdminServices() {
                                         Category *
                                     </label>
 
+                                    <datalist id="saved-service-categories">{categoryOptions.map(name => <option key={name} value={name} />)}</datalist>
                                     <input
                                         name="category"
+                                        list="saved-service-categories"
                                         value={
                                             form.category
                                         }

@@ -1,4 +1,5 @@
-import React, {
+import { adminFetch } from "../utils/adminApi";
+import React, { useCallback,
     useEffect,
     useMemo,
     useState
@@ -55,7 +56,7 @@ const AdminDigitalDocuments = () => {
        ADMIN LOGIN CHECK
     ===================================================== */
 
-    const checkAdminLogin = () => {
+    const checkAdminLogin = useCallback(() => {
 
         const adminLoggedIn =
             localStorage.getItem(
@@ -83,14 +84,14 @@ const AdminDigitalDocuments = () => {
 
 
         return true;
-    };
+    }, [navigate]);
 
 
     /* =====================================================
        LOAD ALL DOCUMENTS
     ===================================================== */
 
-    const loadDocuments = async () => {
+    const loadDocuments = useCallback(async () => {
 
         if (!checkAdminLogin()) {
             return;
@@ -103,7 +104,7 @@ const AdminDigitalDocuments = () => {
 
 
             const response =
-                await fetch(
+                await adminFetch(
                     `${API_URL}/admin/all`,
                     {
                         method: "GET",
@@ -181,7 +182,7 @@ const AdminDigitalDocuments = () => {
             setLoading(false);
 
         }
-    };
+    }, [checkAdminLogin, navigate]);
 
 
     /* =====================================================
@@ -194,7 +195,7 @@ const AdminDigitalDocuments = () => {
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
 
-    }, []);
+    }, [loadDocuments]);
 
 
     /* =====================================================
@@ -424,7 +425,7 @@ const AdminDigitalDocuments = () => {
 
 
             const response =
-                await fetch(
+                await adminFetch(
                     endpoint,
                     {
                         method: "PATCH",
@@ -554,7 +555,7 @@ const AdminDigitalDocuments = () => {
         try {
 
             const response =
-                await fetch(
+                await adminFetch(
                     `${API_URL}/admin/${document._id}`,
                     {
                         method: "DELETE"
@@ -675,6 +676,7 @@ const AdminDigitalDocuments = () => {
             "adminLoggedIn"
         );
 
+        localStorage.removeItem("adminToken");
         localStorage.removeItem(
             "admin"
         );

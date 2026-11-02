@@ -1,6 +1,7 @@
+import { api } from "../utils/adminApi";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./ReportsIssue.css";
+import "./ReportIssue.css";
 
 const ReportsIssue = () => {
     const navigate = useNavigate();
@@ -13,6 +14,8 @@ const ReportsIssue = () => {
     });
 
     const [message, setMessage] = useState("");
+    const [busy, setBusy] = useState(false);
+    const [error, setError] = useState("");
 
     const handleChange = (e) => {
         setFormData({
@@ -21,7 +24,7 @@ const ReportsIssue = () => {
         });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (
@@ -34,16 +37,16 @@ const ReportsIssue = () => {
             return;
         }
 
-        setMessage(
-            "Your civic issue has been submitted successfully."
-        );
-
-        setFormData({
-            title: "",
-            category: "",
-            description: "",
-            location: ""
-        });
+        setBusy(true); setError(""); setMessage("");
+        try {
+            await api("/api/complaints", { method: "POST", body: JSON.stringify({
+                subject: formData.title, category: formData.category,
+                description: formData.description, address: formData.location
+            }) });
+            setMessage("Your civic issue has been submitted. View it in My Complaints.");
+            setFormData({ title: "", category: "", description: "", location: "" });
+        } catch (e) { setError(e.message); }
+        finally { setBusy(false); }
     };
 
     return (
@@ -111,6 +114,7 @@ const ReportsIssue = () => {
 
                     <h2>Issue Details</h2>
 
+                    {error && <p role="alert">{error}</p>}
                     {message && (
                         <div className="reports-message">
                             {message}
@@ -200,8 +204,9 @@ const ReportsIssue = () => {
                         <button
                             type="submit"
                             className="submit-report-button"
+                            disabled={busy}
                         >
-                            Submit Complaint
+                            {busy ? "Submitting..." : "Submit Complaint"}
                         </button>
 
                     </form>

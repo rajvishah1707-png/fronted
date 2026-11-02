@@ -24,7 +24,7 @@
     color: #667085;
 }
 
-.back-button {
+.reports-page .back-button {
     border: none;
     background: #ffffff;
     color: #344054;
@@ -35,7 +35,7 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
-.back-button:hover {
+.reports-page .back-button:hover {
     background: #eef2ff;
 }
 
@@ -66,40 +66,40 @@
     line-height: 1.6;
 }
 
-.info-item {
+.reports-page .info-item {
     display: flex;
     gap: 15px;
     margin-top: 25px;
 }
 
-.info-item span {
+.reports-page .info-item span {
     font-size: 28px;
 }
 
-.info-item strong {
+.reports-page .info-item strong {
     color: #172033;
 }
 
-.info-item p {
+.reports-page .info-item p {
     margin: 5px 0 0;
     color: #667085;
     line-height: 1.5;
 }
 
-.form-group {
+.reports-page .form-group {
     margin-bottom: 20px;
 }
 
-.form-group label {
+.reports-page .form-group label {
     display: block;
     margin-bottom: 8px;
     color: #344054;
     font-weight: 600;
 }
 
-.form-group input,
-.form-group select,
-.form-group textarea {
+.reports-page .form-group input,
+.reports-page .form-group select,
+.reports-page .form-group textarea {
     width: 100%;
     box-sizing: border-box;
     border: 1px solid #d0d5dd;
@@ -110,18 +110,18 @@
     font-family: inherit;
 }
 
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
+.reports-page .form-group input:focus,
+.reports-page .form-group select:focus,
+.reports-page .form-group textarea:focus {
     border-color: #667eea;
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.12);
 }
 
-.form-group textarea {
+.reports-page .form-group textarea {
     resize: vertical;
 }
 
-.submit-report-button {
+.reports-page .submit-report-button {
     width: 100%;
     border: none;
     border-radius: 8px;
@@ -133,11 +133,11 @@
     cursor: pointer;
 }
 
-.submit-report-button:hover {
+.reports-page .submit-report-button:hover {
     background: #4338ca;
 }
 
-.reports-message {
+.reports-page .reports-message {
     margin-bottom: 20px;
     padding: 12px 15px;
     border-radius: 8px;

@@ -1,4 +1,5 @@
-import React, {
+import { adminFetch } from "../utils/adminApi";
+import React, { useCallback,
     useEffect,
     useMemo,
     useState
@@ -86,7 +87,7 @@ const Complaints = () => {
        CHECK ADMIN LOGIN
     ===================================================== */
 
-    const checkAdminLogin = () => {
+    const checkAdminLogin = useCallback(() => {
 
         const adminLoggedIn =
             localStorage.getItem(
@@ -113,14 +114,14 @@ const Complaints = () => {
         }
 
         return true;
-    };
+    }, [navigate]);
 
 
     /* =====================================================
        LOAD COMPLAINTS
     ===================================================== */
 
-    const loadComplaints = async () => {
+    const loadComplaints = useCallback(async () => {
 
         if (!checkAdminLogin()) {
             return;
@@ -133,7 +134,7 @@ const Complaints = () => {
 
 
             const response =
-                await fetch(API_URL, {
+                await adminFetch(API_URL, {
                     method: "GET",
 
                     headers: {
@@ -219,7 +220,7 @@ const Complaints = () => {
 
         }
 
-    };
+    }, [checkAdminLogin, navigate]);
 
 
     /* =====================================================
@@ -232,7 +233,7 @@ const Complaints = () => {
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
 
-    }, []);
+    }, [loadComplaints]);
 
 
     /* =====================================================
@@ -405,7 +406,7 @@ const Complaints = () => {
 
 
             const response =
-                await fetch(
+                await adminFetch(
                     `${API_URL}/${selectedComplaint._id}/status`,
                     {
                         method: "PATCH",
@@ -528,7 +529,7 @@ const Complaints = () => {
         try {
 
             const response =
-                await fetch(
+                await adminFetch(
                     `${API_URL}/${complaint._id}`,
                     {
                         method: "DELETE"
@@ -646,6 +647,7 @@ const Complaints = () => {
             "adminLoggedIn"
         );
 
+        localStorage.removeItem("adminToken");
         localStorage.removeItem(
             "admin"
         );

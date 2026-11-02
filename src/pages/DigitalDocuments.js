@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import "./DigitalDocuments.css";
 
 const API_URL = "https://backend-1df5.onrender.com/api/digital-documents";
@@ -29,12 +29,12 @@ const DigitalDocuments = () => {
     // =========================
     // GET MY DOCUMENTS
     // =========================
-    const fetchDocuments = async () => {
+    const fetchDocuments = useCallback(async () => {
         try {
             setLoading(true);
             setError("");
 
-            const token = getToken();
+            const token = localStorage.getItem("smartCityToken");
 
             if (!token) {
                 setError("Please login again.");
@@ -64,11 +64,11 @@ const DigitalDocuments = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
 
     useEffect(() => {
         fetchDocuments();
-    }, []);
+    }, [fetchDocuments]);
 
     // =========================
     // FORM CHANGE
