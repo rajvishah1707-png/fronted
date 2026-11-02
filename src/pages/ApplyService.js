@@ -1,3 +1,4 @@
+import DocumentSelector from "../components/DocumentSelector";
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import "./ApplyService.css";
@@ -11,6 +12,9 @@ function ApplyService() {
     );
 
     const [user, setUser] = useState(null);
+
+    const [documents, setDocuments] = useState([]);
+    const [documentUploadBusy, setDocumentUploadBusy] = useState(false);
 
     const [purpose, setPurpose] = useState("");
     const [additionalDetails, setAdditionalDetails] = useState("");
@@ -53,6 +57,7 @@ function ApplyService() {
 
         setError("");
         setSuccess("");
+        if (documentUploadBusy) { setError("Wait for the document upload to finish."); return; }
 
         const token = localStorage.getItem("smartCityToken");
 
@@ -114,6 +119,7 @@ function ApplyService() {
                 user?.pincode ||
                 "",
 
+            documents,
             purpose: purpose,
             additionalDetails: additionalDetails
         };
@@ -326,6 +332,8 @@ function ApplyService() {
 
 
                         <form onSubmit={handleSubmit}>
+                            <h3>Supporting Documents</h3>
+                            <DocumentSelector requirements={service.requiredDocuments || []} value={documents} onChange={setDocuments} onBusyChange={setDocumentUploadBusy} disabled={loading || documentUploadBusy} />
 
                             <div className="form-row">
 
@@ -480,7 +488,7 @@ function ApplyService() {
                             <button
                                 type="submit"
                                 className="submit-application-button"
-                                disabled={loading}
+                                disabled={loading || documentUploadBusy}
                             >
                                 {loading
                                     ? "Submitting..."
