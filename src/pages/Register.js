@@ -181,7 +181,7 @@ const Register = () => {
                     replace: true,
                     state: {
                         registered: true,
-                        registeredEmail: email.trim().toLowerCase()
+                        registeredPhone: phone.trim()
                     }
                 });
             }, 1000);

@@ -6,502 +6,466 @@ import {
 
 import "./Login.css";
 
-const Login = () => {
+const AUTH_API_URL = "https://backend-1df5.onrender.com/api/auth";
 
+const readResponse = async (response) => {
+    const text = await response.text();
+
+    try {
+        return text ? JSON.parse(text) : {};
+    } catch (error) {
+        throw new Error(
+            "Backend returned an invalid response. Please try again later."
+        );
+    }
+};
+
+const Login = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
-    const [email, setEmail] = useState(
-        location.state?.registeredEmail || ""
+    const [phone, setPhone] = useState(
+        location.state?.registeredPhone || ""
     );
-
-    const [password, setPassword] = useState("");
-
+    const [otp, setOtp] = useState("");
+    const [newPassword, setNewPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [flow, setFlow] = useState("login");
+    const [step, setStep] = useState("phone");
     const [error, setError] = useState("");
+    const [success, setSuccess] = useState("");
     const [loading, setLoading] = useState(false);
-    const [showPassword, setShowPassword] = useState(false);
-
-    /* ==========================================
-       CHECK EXISTING CITIZEN LOGIN
-    ========================================== */
+    const [resendCountdown, setResendCountdown] = useState(0);
 
     useEffect(() => {
-
-        /*
-         * IMPORTANT:
-         * Admin session should NEVER control
-         * the citizen login page.
-         */
-
         const adminLoggedIn =
             localStorage.getItem("adminLoggedIn") === "true";
-
-        const adminData =
-            localStorage.getItem("admin");
-
-        /*
-         * If admin session exists but user opened
-         * citizen login, clear admin session.
-         */
+        const adminData = localStorage.getItem("admin");
 
         if (adminLoggedIn || adminData) {
-
             localStorage.removeItem("admin");
             localStorage.removeItem("adminLoggedIn");
             localStorage.removeItem("adminToken");
         }
 
-        /*
-         * Now check only citizen session.
-         */
-
-        const token =
-            localStorage.getItem("smartCityToken");
-
-        const userData =
-            localStorage.getItem("smartCityUser");
+        const token = localStorage.getItem("smartCityToken");
+        const userData = localStorage.getItem("smartCityUser");
 
         if (!token || !userData) {
             return;
         }
 
         try {
-
             const user = JSON.parse(userData);
 
-            /*
-             * Citizen login page should not redirect
-             * admin users.
-             */
-
             if (user.role === "admin") {
-
-                localStorage.removeItem(
-                    "smartCityToken"
-                );
-
-                localStorage.removeItem(
-                    "smartCityUser"
-                );
-
+                localStorage.removeItem("smartCityToken");
+                localStorage.removeItem("smartCityUser");
                 return;
             }
 
-            navigate("/dashboard", {
-                replace: true
-            });
-
-        } catch (error) {
-
-            localStorage.removeItem(
-                "smartCityToken"
-            );
-
-            localStorage.removeItem(
-                "smartCityUser"
-            );
+            navigate("/dashboard", { replace: true });
+        } catch (parseError) {
+            localStorage.removeItem("smartCityToken");
+            localStorage.removeItem("smartCityUser");
         }
-
     }, [navigate]);
 
-    /* ==========================================
-       LOGIN SUBMIT
-    ========================================== */
+    useEffect(() => {
+        if (resendCountdown <= 0) {
+            return undefined;
+        }
 
-    const handleSubmit = async (e) => {
+        const timer = window.setTimeout(
+            () => setResendCountdown((remaining) => remaining - 1),
+            1000
+        );
 
-        e.preventDefault();
+        return () => window.clearTimeout(timer);
+    }, [resendCountdown]);
+
+    const requestOtp = async (isResend = false) => {
+        const normalizedPhone = phone.trim();
+
+        if (!/^\d{10}$/.test(normalizedPhone)) {
+            setError("Please enter a valid 10-digit mobile number.");
+            return;
+        }
 
         setError("");
-
-        /* ===============================
-           VALIDATION
-        =============================== */
-
-        if (!email.trim()) {
-
-            setError(
-                "Please enter your email address."
-            );
-
-            return;
-        }
-
-        if (!password) {
-
-            setError(
-                "Please enter your password."
-            );
-
-            return;
-        }
-
+        setSuccess("");
         setLoading(true);
 
         try {
+            const endpoint = flow === "login"
+                ? "/request-login-otp"
+                : "/forgot-password";
+            const response = await fetch(`${AUTH_API_URL}${endpoint}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ phone: normalizedPhone })
+            });
+            const data = await readResponse(response);
 
-            /* ===============================
-               CLEAR ADMIN SESSION
-            =============================== */
+            if (!response.ok) {
+                throw new Error(data.message || "Unable to send the OTP.");
+            }
 
+            setPhone(normalizedPhone);
+            setStep("otp");
+            setOtp("");
+            setResendCountdown(60);
+            setSuccess(
+                isResend
+                    ? "If an account exists for this phone, a new OTP has been sent."
+                    : flow === "login"
+                        ? "If an active account exists for this phone, an OTP has been sent by SMS."
+                        : "If an account exists for this phone, a password reset OTP has been sent by SMS."
+            );
+        } catch (requestError) {
+            setError(requestError.message || "Unable to send the OTP.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const verifyLoginOtp = async () => {
+        if (!/^\d{6}$/.test(otp.trim())) {
+            setError("Please enter the 6-digit OTP sent to your phone.");
+            return;
+        }
+
+        setError("");
+        setSuccess("");
+        setLoading(true);
+
+        try {
             localStorage.removeItem("admin");
             localStorage.removeItem("adminLoggedIn");
             localStorage.removeItem("adminToken");
 
-            /* ===============================
-               LOGIN API
-            =============================== */
-
-            const response = await fetch(
-                "https://backend-1df5.onrender.com/api/auth/login",
-                {
-                    method: "POST",
-
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-
-                    body: JSON.stringify({
-                        email: email
-                            .trim()
-                            .toLowerCase(),
-
-                        password: password
-                    })
-                }
-            );
-
-            /* ===============================
-               READ RESPONSE
-            =============================== */
-
-            const text =
-                await response.text();
-
-            let data;
-
-            try {
-
-                data = JSON.parse(text);
-
-            } catch (jsonError) {
-
-                throw new Error(
-                    "Backend returned an invalid response. Please make sure the server is running on port 5000."
-                );
-            }
-
-            /* ===============================
-               API ERROR
-            =============================== */
+            const response = await fetch(`${AUTH_API_URL}/verify-login-otp`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    phone: phone.trim(),
+                    otp: otp.trim()
+                })
+            });
+            const data = await readResponse(response);
 
             if (!response.ok) {
-
-                throw new Error(
-                    data.message ||
-                    "Invalid email or password."
-                );
+                throw new Error(data.message || "OTP verification failed.");
             }
 
-            /* ===============================
-               CHECK LOGIN RESPONSE
-            =============================== */
-
-            if (!data.token) {
-
-                throw new Error(
-                    "Login token was not received from server."
-                );
+            if (!data.token || !data.user) {
+                throw new Error("Login information was not received from server.");
             }
-
-            if (!data.user) {
-
-                throw new Error(
-                    "User information was not received from server."
-                );
-            }
-
-            /* ===============================
-               BLOCK ADMIN FROM CITIZEN LOGIN
-            =============================== */
 
             if (data.user.role === "admin") {
-
                 throw new Error(
                     "Administrator account detected. Please use Administrator Login."
                 );
             }
 
-            /* ===============================
-               SAVE CITIZEN SESSION
-            =============================== */
-
-            localStorage.setItem(
-                "smartCityToken",
-                data.token
-            );
-
-            localStorage.setItem(
-                "smartCityUser",
-                JSON.stringify(data.user)
-            );
-
-            /* ===============================
-               GO TO CITIZEN DASHBOARD
-            =============================== */
-
-            navigate("/dashboard", {
-                replace: true
-            });
-
-        } catch (error) {
-
-            console.error(
-                "Login Error:",
-                error
-            );
-
-            setError(
-                error.message ||
-                "Login failed. Please try again."
-            );
-
+            localStorage.setItem("smartCityToken", data.token);
+            localStorage.setItem("smartCityUser", JSON.stringify(data.user));
+            navigate("/dashboard", { replace: true });
+        } catch (verificationError) {
+            setError(verificationError.message || "OTP verification failed.");
         } finally {
-
             setLoading(false);
         }
     };
 
+    const resetPassword = async () => {
+        if (!/^\d{6}$/.test(otp.trim())) {
+            setError("Please enter the 6-digit OTP sent to your phone.");
+            return;
+        }
+
+        if (newPassword.length < 8) {
+            setError("Password must contain at least 8 characters.");
+            return;
+        }
+
+        if (newPassword !== confirmPassword) {
+            setError("Password and confirm password do not match.");
+            return;
+        }
+
+        setError("");
+        setSuccess("");
+        setLoading(true);
+
+        try {
+            const response = await fetch(`${AUTH_API_URL}/reset-password`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    phone: phone.trim(),
+                    otp: otp.trim(),
+                    newPassword
+                })
+            });
+            const data = await readResponse(response);
+
+            if (!response.ok) {
+                throw new Error(data.message || "Unable to reset your password.");
+            }
+
+            setFlow("login");
+            setStep("phone");
+            setOtp("");
+            setNewPassword("");
+            setConfirmPassword("");
+            setResendCountdown(0);
+            setSuccess("Password reset successfully. Request a login OTP to continue.");
+        } catch (resetError) {
+            setError(resetError.message || "Unable to reset your password.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleSubmit = (event) => {
+        event.preventDefault();
+
+        if (step === "phone") {
+            requestOtp();
+        } else if (flow === "login") {
+            verifyLoginOtp();
+        } else {
+            resetPassword();
+        }
+    };
+
+    const switchFlow = (nextFlow) => {
+        setFlow(nextFlow);
+        setStep("phone");
+        setOtp("");
+        setNewPassword("");
+        setConfirmPassword("");
+        setError("");
+        setSuccess("");
+        setResendCountdown(0);
+    };
+
+    const changePhone = () => {
+        setStep("phone");
+        setOtp("");
+        setError("");
+        setSuccess("");
+        setResendCountdown(0);
+    };
+
     return (
-
         <div className="login-page">
-
             <div className="login-card">
-
-                {/* ===============================
-                    BRAND
-                =============================== */}
-
                 <div className="login-brand">
-
-                    <div className="login-logo">
-                        SC
-                    </div>
-
+                    <div className="login-logo">SC</div>
                     <div>
-
-                        <h1>
-                            Smart City
-                        </h1>
-
-                        <p>
-                            Citizen Platform
-                        </p>
-
+                        <h1>Smart City</h1>
+                        <p>Citizen Platform</p>
                     </div>
-
                 </div>
-
-                {/* ===============================
-                    HEADING
-                =============================== */}
 
                 <div className="login-heading">
-
                     <h2>
-                        Welcome Back
+                        {flow === "forgot"
+                            ? "Reset Password"
+                            : "Welcome Back"}
                     </h2>
-
                     <p>
-                        Login to access your Smart City account
+                        {step === "phone"
+                            ? flow === "forgot"
+                                ? "Get a password reset OTP on your registered mobile number"
+                                : "Login securely with an OTP sent to your mobile number"
+                            : flow === "forgot"
+                                ? "Verify your SMS OTP and choose a new password"
+                                : "Enter the OTP sent to your registered mobile number"}
                     </p>
-
                 </div>
 
-                {/* ===============================
-                    REGISTRATION SUCCESS
-                =============================== */}
-
                 {location.state?.registered && (
-
                     <div className="login-success">
-
-                        ✓ Registration successful.
-                        Please login with your email and password.
-
+                        Registration successful. Request an OTP by SMS to log in.
                     </div>
-
                 )}
 
-                {/* ===============================
-                    ERROR
-                =============================== */}
-
-                {error && (
-
-                    <div className="login-error">
-
-                        ⚠️ {error}
-
-                    </div>
-
-                )}
-
-                {/* ===============================
-                    LOGIN FORM
-                =============================== */}
+                {success && <div className="login-success">{success}</div>}
+                {error && <div className="login-error">⚠️ {error}</div>}
 
                 <form onSubmit={handleSubmit}>
-
-                    {/* EMAIL */}
-
-                    <div className="login-form-group">
-
-                        <label>
-                            Email Address
-                        </label>
-
-                        <input
-                            type="email"
-                            value={email}
-                            onChange={(e) => {
-
-                                setEmail(
-                                    e.target.value
-                                );
-
-                                setError("");
-                            }}
-                            placeholder="Enter your email"
-                            autoComplete="email"
-                        />
-
-                    </div>
-
-                    {/* PASSWORD */}
-
-                    <div className="login-form-group">
-
-                        <label>
-                            Password
-                        </label>
-
-                        <div className="password-box">
-
+                    {step === "phone" ? (
+                        <div className="login-form-group">
+                            <label htmlFor="login-phone">Mobile Number</label>
                             <input
-                                type={
-                                    showPassword
-                                        ? "text"
-                                        : "password"
-                                }
-                                value={password}
-                                onChange={(e) => {
-
-                                    setPassword(
-                                        e.target.value
-                                    );
-
+                                id="login-phone"
+                                type="tel"
+                                value={phone}
+                                onChange={(event) => {
+                                    setPhone(event.target.value.replace(/\D/g, "").slice(0, 10));
                                     setError("");
                                 }}
-                                placeholder="Enter your password"
-                                autoComplete="current-password"
+                                placeholder="Enter your 10-digit mobile number"
+                                autoComplete="tel"
+                                inputMode="numeric"
+                                maxLength={10}
+                                required
                             />
-
-                            <button
-                                type="button"
-                                onClick={() =>
-                                    setShowPassword(
-                                        !showPassword
-                                    )
-                                }
-                            >
-                                {showPassword
-                                    ? "Hide"
-                                    : "Show"
-                                }
-                            </button>
-
                         </div>
+                    ) : (
+                        <>
+                            <div className="login-form-group">
+                                <label htmlFor="login-otp">SMS Verification Code</label>
+                                <input
+                                    id="login-otp"
+                                    type="text"
+                                    value={otp}
+                                    onChange={(event) => {
+                                        setOtp(event.target.value.replace(/\D/g, "").slice(0, 6));
+                                        setError("");
+                                    }}
+                                    placeholder="Enter 6-digit OTP"
+                                    autoComplete="one-time-code"
+                                    inputMode="numeric"
+                                    maxLength={6}
+                                    required
+                                />
+                            </div>
 
-                    </div>
-
-                    {/* LOGIN BUTTON */}
+                            {flow === "forgot" && (
+                                <>
+                                    <div className="login-form-group">
+                                        <label htmlFor="new-password">New Password</label>
+                                        <input
+                                            id="new-password"
+                                            type="password"
+                                            value={newPassword}
+                                            onChange={(event) => {
+                                                setNewPassword(event.target.value);
+                                                setError("");
+                                            }}
+                                            placeholder="At least 8 characters"
+                                            autoComplete="new-password"
+                                            minLength={8}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="login-form-group">
+                                        <label htmlFor="confirm-password">
+                                            Confirm New Password
+                                        </label>
+                                        <input
+                                            id="confirm-password"
+                                            type="password"
+                                            value={confirmPassword}
+                                            onChange={(event) => {
+                                                setConfirmPassword(event.target.value);
+                                                setError("");
+                                            }}
+                                            placeholder="Re-enter your new password"
+                                            autoComplete="new-password"
+                                            minLength={8}
+                                            required
+                                        />
+                                    </div>
+                                </>
+                            )}
+                        </>
+                    )}
 
                     <button
                         type="submit"
                         className="login-button"
                         disabled={loading}
                     >
-
                         {loading
-                            ? "Signing In..."
-                            : "Login to Citizen Portal →"
-                        }
-
+                            ? "Please wait..."
+                            : step === "phone"
+                                ? flow === "forgot"
+                                    ? "Send Password Reset OTP"
+                                    : "Send Login OTP"
+                                : flow === "forgot"
+                                    ? "Reset Password"
+                                    : "Verify OTP & Login"}
                     </button>
-
                 </form>
 
-                {/* ===============================
-                    REGISTER
-                =============================== */}
+                {step === "otp" && (
+                    <div className="login-otp-actions">
+                        <button
+                            type="button"
+                            className="login-text-button"
+                            onClick={changePhone}
+                            disabled={loading}
+                        >
+                            Change mobile number
+                        </button>
+                        <button
+                            type="button"
+                            className="login-text-button"
+                            onClick={() => requestOtp(true)}
+                            disabled={loading || resendCountdown > 0}
+                        >
+                            {resendCountdown > 0
+                                ? `Resend OTP in ${resendCountdown}s`
+                                : "Resend OTP"}
+                        </button>
+                    </div>
+                )}
 
-                <div className="login-register">
+                {flow === "login" && step === "phone" && (
+                    <div className="login-forgot">
+                        <button
+                            type="button"
+                            className="login-text-button"
+                            onClick={() => switchFlow("forgot")}
+                        >
+                            Forgot password?
+                        </button>
+                    </div>
+                )}
 
-                    <span>
-                        Don't have an account?
-                    </span>
+                {flow === "forgot" && (
+                    <div className="login-register">
+                        <span>Remembered your password?</span>
+                        <button type="button" onClick={() => switchFlow("login")}>
+                            Back to Login
+                        </button>
+                    </div>
+                )}
 
-                    <button
-                        type="button"
-                        onClick={() =>
-                            navigate("/register")
-                        }
-                    >
-                        Create Account
-                    </button>
-
-                </div>
-
-                {/* ===============================
-                    ADMIN LOGIN
-                =============================== */}
+                {flow === "login" && (
+                    <div className="login-register">
+                        <span>Don't have an account?</span>
+                        <button type="button" onClick={() => navigate("/register")}>
+                            Create Account
+                        </button>
+                    </div>
+                )}
 
                 <button
                     type="button"
                     className="admin-login-button"
                     onClick={() => {
-
-                        localStorage.removeItem(
-                            "smartCityToken"
-                        );
-
-                        localStorage.removeItem(
-                            "smartCityUser"
-                        );
-
+                        localStorage.removeItem("smartCityToken");
+                        localStorage.removeItem("smartCityUser");
                         navigate("/admin-login");
                     }}
                 >
                     Administrator Login
                 </button>
 
-                {/* ===============================
-                    BACK HOME
-                =============================== */}
-
                 <button
                     type="button"
                     className="back-home-button"
-                    onClick={() =>
-                        navigate("/")
-                    }
+                    onClick={() => navigate("/")}
                 >
                     ← Back to Home
                 </button>
-
             </div>
-
         </div>
     );
 };

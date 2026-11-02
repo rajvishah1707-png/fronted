@@ -115,6 +115,33 @@
     box-shadow: 0 0 0 4px rgba(53,100,235,0.09);
 }
 
+.login-otp-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 15px;
+}
+
+.login-forgot {
+    margin-top: 17px;
+    text-align: right;
+}
+
+.login-text-button {
+    border: none;
+    padding: 0;
+    background: transparent;
+    color: #315eea;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.login-text-button:disabled {
+    color: #8090a6;
+    cursor: not-allowed;
+}
+
 .password-box {
     position: relative;
 }
