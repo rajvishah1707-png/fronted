@@ -24,6 +24,10 @@ const Login = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
+    const [email, setEmail] = useState(
+        location.state?.registeredEmail || ""
+    );
+    const [password, setPassword] = useState("");
     const [phone, setPhone] = useState(
         location.state?.registeredPhone || ""
     );
@@ -31,7 +35,7 @@ const Login = () => {
     const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [flow, setFlow] = useState("login");
-    const [step, setStep] = useState("phone");
+    const [step, setStep] = useState("credentials");
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
     const [loading, setLoading] = useState(false);
@@ -85,9 +89,12 @@ const Login = () => {
     }, [resendCountdown]);
 
     const requestOtp = async (isResend = false) => {
-        const normalizedPhone = phone.trim();
+        if (flow === "login" && (!email.trim() || !password)) {
+            setError("Please enter your email and password.");
+            return;
+        }
 
-        if (!/^\d{10}$/.test(normalizedPhone)) {
+        if (flow === "forgot" && !/^\d{10}$/.test(phone.trim())) {
             setError("Please enter a valid 10-digit mobile number.");
             return;
         }
@@ -103,7 +110,11 @@ const Login = () => {
             const response = await fetch(`${AUTH_API_URL}${endpoint}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ phone: normalizedPhone })
+                body: JSON.stringify(
+                    flow === "login"
+                        ? { email: email.trim().toLowerCase(), password }
+                        : { phone: phone.trim() }
+                )
             });
             const data = await readResponse(response);
 
@@ -111,15 +122,14 @@ const Login = () => {
                 throw new Error(data.message || "Unable to send the OTP.");
             }
 
-            setPhone(normalizedPhone);
             setStep("otp");
             setOtp("");
             setResendCountdown(60);
             setSuccess(
                 isResend
-                    ? "If an account exists for this phone, a new OTP has been sent."
+                    ? "A new OTP has been sent to your registered mobile."
                     : flow === "login"
-                        ? "If an active account exists for this phone, an OTP has been sent by SMS."
+                        ? "Email and password verified. An OTP has been sent to your registered mobile."
                         : "If an account exists for this phone, a password reset OTP has been sent by SMS."
             );
         } catch (requestError) {
@@ -148,7 +158,7 @@ const Login = () => {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    phone: phone.trim(),
+                    email: email.trim().toLowerCase(),
                     otp: otp.trim()
                 })
             });
@@ -215,7 +225,7 @@ const Login = () => {
             }
 
             setFlow("login");
-            setStep("phone");
+            setStep("credentials");
             setOtp("");
             setNewPassword("");
             setConfirmPassword("");
@@ -231,7 +241,7 @@ const Login = () => {
     const handleSubmit = (event) => {
         event.preventDefault();
 
-        if (step === "phone") {
+        if (step === "credentials" || step === "phone") {
             requestOtp();
         } else if (flow === "login") {
             verifyLoginOtp();
@@ -242,7 +252,7 @@ const Login = () => {
 
     const switchFlow = (nextFlow) => {
         setFlow(nextFlow);
-        setStep("phone");
+        setStep(nextFlow === "login" ? "credentials" : "phone");
         setOtp("");
         setNewPassword("");
         setConfirmPassword("");
@@ -252,7 +262,7 @@ const Login = () => {
     };
 
     const changePhone = () => {
-        setStep("phone");
+        setStep(flow === "login" ? "credentials" : "phone");
         setOtp("");
         setError("");
         setSuccess("");
@@ -277,11 +287,11 @@ const Login = () => {
                             : "Welcome Back"}
                     </h2>
                     <p>
-                        {step === "phone"
-                            ? flow === "forgot"
+                        {step === "credentials"
+                            ? "Enter your registered email and password, then verify the SMS OTP"
+                            : step === "phone"
                                 ? "Get a password reset OTP on your registered mobile number"
-                                : "Login securely with an OTP sent to your mobile number"
-                            : flow === "forgot"
+                                : flow === "forgot"
                                 ? "Verify your SMS OTP and choose a new password"
                                 : "Enter the OTP sent to your registered mobile number"}
                     </p>
@@ -289,7 +299,7 @@ const Login = () => {
 
                 {location.state?.registered && (
                     <div className="login-success">
-                        Registration successful. Request an OTP by SMS to log in.
+                        Registration successful. Log in with your email and password, then verify the SMS OTP.
                     </div>
                 )}
 
@@ -297,7 +307,40 @@ const Login = () => {
                 {error && <div className="login-error">⚠️ {error}</div>}
 
                 <form onSubmit={handleSubmit}>
-                    {step === "phone" ? (
+                    {step === "credentials" ? (
+                        <>
+                            <div className="login-form-group">
+                                <label htmlFor="login-email">Email Address</label>
+                                <input
+                                    id="login-email"
+                                    type="email"
+                                    value={email}
+                                    onChange={(event) => {
+                                        setEmail(event.target.value);
+                                        setError("");
+                                    }}
+                                    placeholder="Enter your registered email"
+                                    autoComplete="username"
+                                    required
+                                />
+                            </div>
+                            <div className="login-form-group">
+                                <label htmlFor="login-password">Password</label>
+                                <input
+                                    id="login-password"
+                                    type="password"
+                                    value={password}
+                                    onChange={(event) => {
+                                        setPassword(event.target.value);
+                                        setError("");
+                                    }}
+                                    placeholder="Enter your password"
+                                    autoComplete="current-password"
+                                    required
+                                />
+                            </div>
+                        </>
+                    ) : step === "phone" ? (
                         <div className="login-form-group">
                             <label htmlFor="login-phone">Mobile Number</label>
                             <input
@@ -383,7 +426,7 @@ const Login = () => {
                     >
                         {loading
                             ? "Please wait..."
-                            : step === "phone"
+                            : step === "credentials" || step === "phone"
                                 ? flow === "forgot"
                                     ? "Send Password Reset OTP"
                                     : "Send Login OTP"
@@ -416,7 +459,7 @@ const Login = () => {
                     </div>
                 )}
 
-                {flow === "login" && step === "phone" && (
+                {flow === "login" && step === "credentials" && (
                     <div className="login-forgot">
                         <button
                             type="button"
