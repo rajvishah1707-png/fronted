@@ -437,3 +437,7 @@
     }
 
 }
+
+/* Preserve numbered guidance and long IDs without overflowing the conversation. */
+.ai-page .chat-bubble { white-space: pre-wrap; overflow-wrap: anywhere; }
+.ai-page button:disabled { opacity: 0.55; cursor: not-allowed; }

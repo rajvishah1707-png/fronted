@@ -1,345 +1,87 @@
-import React, {
-    useEffect,
-    useRef,
-    useState
-} from "react";
-
-import {
-    useNavigate
-} from "react-router-dom";
-
+import React, { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { API_URL } from "../utils/adminApi";
 import "./AIAssistant.css";
 
-
+const greeting = { id: 1, sender: "ai", text: "Hello! 👋 I am your Smart City Assistant. How can I help you today?" };
 const AIAssistant = () => {
-
     const navigate = useNavigate();
-
-    const messagesEndRef =
-        useRef(null);
-
-
-    const [
-        message,
-        setMessage
-    ] = useState("");
-
-
-    const [
-        loading,
-        setLoading
-    ] = useState(false);
-
-
-    const [
-        messages,
-        setMessages
-    ] = useState([
-        {
-            id: 1,
-            sender: "ai",
-            text:
-                "Hello! 👋 I am your Smart City Assistant. How can I help you today?"
-        }
-    ]);
-
-
-    // ========================================================
-    // USER
-    // ========================================================
-
-    const getUser = () => {
-
-        try {
-
-            const storedUser =
-                localStorage.getItem(
-                    "user"
-                );
-
-
-            if (!storedUser) {
-                return null;
-            }
-
-
-            return JSON.parse(
-                storedUser
-            );
-
-        } catch (error) {
-
-            return null;
-
-        }
-
-    };
-
-
-    // ========================================================
-    // AUTO SCROLL
-    // ========================================================
+    const messagesEndRef = useRef(null);
+    const requestRef = useRef(null);
+    const inFlightRef = useRef(false);
+    const nextId = useRef(2);
+    const [message, setMessage] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [connection, setConnection] = useState("Ready to help");
+    const [messages, setMessages] = useState([greeting]);
 
     useEffect(() => {
+        messagesEndRef.current?.scrollIntoView?.({ behavior: "smooth" });
+    }, [messages, loading]);
+    useEffect(() => () => requestRef.current?.abort(), []);
 
-        messagesEndRef.current?.scrollIntoView({
-            behavior: "smooth"
-        });
+    const sendMessage = async (customMessage = null) => {
+        if (inFlightRef.current) return;
+        const finalMessage = (typeof customMessage === "string" ? customMessage : message).trim();
+        if (!finalMessage || finalMessage.length > 2000) return;
+        const token = localStorage.getItem("smartCityToken");
+        let user;
+        try { user = JSON.parse(localStorage.getItem("smartCityUser") || "null"); } catch { user = null; }
+        if (!token || !user) { navigate("/login", { replace: true }); return; }
 
-    }, [messages]);
-
-
-    // ========================================================
-    // SEND MESSAGE
-    // ========================================================
-
-    const sendMessage =
-        async (
-            customMessage = null
-        ) => {
-
-            const finalMessage =
-                (
-                    customMessage !== null
-                        ? customMessage
-                        : message
-                ).trim();
-
-
-            if (!finalMessage) {
-                return;
+        inFlightRef.current = true;
+        setMessages(previous => [...previous, { id: nextId.current++, sender: "user", text: finalMessage }]);
+        setMessage(""); setLoading(true); setConnection("Replying...");
+        const controller = new AbortController();
+        requestRef.current = controller;
+        const timeout = setTimeout(() => controller.abort(), 30000);
+        try {
+            const response = await fetch(`${API_URL}/api/ai/chat`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                body: JSON.stringify({ message: finalMessage }),
+                signal: controller.signal
+            });
+            if (response.status === 401) {
+                localStorage.removeItem("smartCityToken"); localStorage.removeItem("smartCityUser");
+                navigate("/login", { replace: true }); return;
             }
-
-
-            const user =
-                getUser();
-
-
-            if (!user) {
-
-                navigate(
-                    "/login"
-                );
-
-                return;
-
+            let data;
+            try { data = await response.json(); } catch { throw new Error("The assistant returned an unreadable response. Please try again."); }
+            if (!response.ok || !data.success || typeof data.reply !== "string" || !data.reply.trim()) {
+                throw new Error(data.message || "The assistant is temporarily unavailable. Please try again.");
             }
-
-
-            const userMessage = {
-
-                id:
-                    Date.now(),
-
-                sender:
-                    "user",
-
-                text:
-                    finalMessage
-
-            };
-
-
-            setMessages(
-                previous => [
-                    ...previous,
-                    userMessage
-                ]
-            );
-
-
-            setMessage("");
-
-            setLoading(true);
-
-
-            try {
-
-                const response =
-                    await fetch(
-                        "https://backend-1df5.onrender.com/api/ai/chat",
-                        {
-                            method: "POST",
-
-                            headers: {
-                                "Content-Type":
-                                    "application/json"
-                            },
-
-                            body:
-                                JSON.stringify({
-                                    message:
-                                        finalMessage
-                                })
-                        }
-                    );
-
-
-                const data =
-                    await response.json();
-
-
-                if (
-                    response.ok &&
-                    data.success
-                ) {
-
-                    const aiMessage = {
-
-                        id:
-                            Date.now() + 1,
-
-                        sender:
-                            "ai",
-
-                        text:
-                            data.reply
-
-                    };
-
-
-                    setMessages(
-                        previous => [
-                            ...previous,
-                            aiMessage
-                        ]
-                    );
-
-                } else {
-
-                    setMessages(
-                        previous => [
-                            ...previous,
-                            {
-                                id:
-                                    Date.now() + 1,
-
-                                sender:
-                                    "ai",
-
-                                text:
-                                    "Sorry, I couldn't process your request right now."
-                            }
-                        ]
-                    );
-
-                }
-
-            } catch (error) {
-
-                console.error(
-                    "AI chat error:",
-                    error
-                );
-
-
-                setMessages(
-                    previous => [
-                        ...previous,
-                        {
-                            id:
-                                Date.now() + 1,
-
-                            sender:
-                                "ai",
-
-                            text:
-                                "⚠️ Unable to connect to the Smart City Assistant. Please make sure the backend server is running."
-                        }
-                    ]
-                );
-
-            } finally {
-
-                setLoading(false);
-
-            }
-
-        };
-
-
-    // ========================================================
-    // ENTER KEY
-    // ========================================================
-
-    const handleKeyDown =
-        (e) => {
-
-            if (
-                e.key === "Enter" &&
-                !e.shiftKey
-            ) {
-
-                e.preventDefault();
-
-                sendMessage();
-
-            }
-
-        };
-
-
-    // ========================================================
-    // QUICK QUESTIONS
-    // ========================================================
-
+            setMessages(previous => [...previous, { id: nextId.current++, sender: "ai", text: data.reply }]);
+            setConnection("Ready to help");
+        } catch (error) {
+            setConnection("Connection problem · You can retry");
+            const text = error.name === "AbortError"
+                ? "The assistant took too long to reply. Please try your question again."
+                : error instanceof TypeError
+                    ? "Unable to connect to the assistant. Check your connection and try again. If you are using a preview link, try the main website."
+                    : error.message || "Unable to get a reply. Please try again.";
+            setMessages(previous => [...previous, { id: nextId.current++, sender: "ai", text }]);
+            setMessage(current => current || finalMessage);
+        } finally {
+            clearTimeout(timeout); requestRef.current = null; inFlightRef.current = false; setLoading(false);
+        }
+    };
+    const handleKeyDown = event => {
+        if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent?.isComposing) {
+            event.preventDefault(); sendMessage();
+        }
+    };
     const quickQuestions = [
-
-        "What city services are available?",
-
-        "How can I apply for a service?",
-
-        "How can I track my application?",
-
-        "How can I submit a complaint?",
-
-        "How can I make a payment?",
-
-        "What can I do with digital documents?"
-
+        "What city services are available?", "How can I apply for a service?",
+        "How can I track my application?", "How can I submit a complaint?",
+        "How can I make a payment?", "What can I do with digital documents?"
     ];
-
-
-    // ========================================================
-    // CLEAR CHAT
-    // ========================================================
-
-    const clearChat =
-        () => {
-
-            setMessages([
-                {
-                    id: 1,
-                    sender: "ai",
-                    text:
-                        "Hello! 👋 I am your Smart City Assistant. How can I help you today?"
-                }
-            ]);
-
-        };
-
-
-    // ========================================================
-    // LOGOUT
-    // ========================================================
-
-    const handleLogout =
-        () => {
-
-            localStorage.removeItem(
-                "user"
-            );
-
-            localStorage.removeItem(
-                "token"
-            );
-
-            navigate(
-                "/login"
-            );
-
-        };
-
+    const clearChat = () => { if (!inFlightRef.current) { setMessages([greeting]); setMessage(""); setConnection("Ready to help"); } };
+    const handleLogout = () => {
+        requestRef.current?.abort();
+        ["smartCityUser", "smartCityToken", "user", "token"].forEach(key => localStorage.removeItem(key));
+        navigate("/login", { replace: true });
+    };
 
     return (
 
@@ -501,6 +243,7 @@ const AIAssistant = () => {
 
                     <button
                         className="clear-chat-btn"
+                        disabled={loading}
                         onClick={
                             clearChat
                         }
@@ -528,7 +271,7 @@ const AIAssistant = () => {
                         </strong>
 
                         <span>
-                            ● Online • Ready to help
+                            {connection}
                         </span>
 
                     </div>
@@ -543,7 +286,7 @@ const AIAssistant = () => {
                 <section className="ai-chat-card">
 
 
-                    <div className="ai-chat-body">
+                    <div className="ai-chat-body" role="log" aria-live="polite" aria-label="Assistant conversation">
 
                         {messages.map(
                             item => (
@@ -649,6 +392,7 @@ const AIAssistant = () => {
                                         key={
                                             question
                                         }
+                                        disabled={loading}
                                         onClick={() =>
                                             sendMessage(
                                                 question
@@ -673,6 +417,8 @@ const AIAssistant = () => {
                     <div className="ai-input-area">
 
                         <textarea
+                            aria-label="Your question"
+                            maxLength={2000}
                             value={
                                 message
                             }
@@ -692,6 +438,7 @@ const AIAssistant = () => {
 
                         <button
                             className="send-ai-btn"
+                            aria-label="Send message"
                             onClick={() =>
                                 sendMessage()
                             }
