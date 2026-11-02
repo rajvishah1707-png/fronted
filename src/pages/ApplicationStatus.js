@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "./ApplicationStatus.css";
 
@@ -14,14 +14,7 @@ function ApplicationStatus() {
 
     const token = localStorage.getItem("smartCityToken");
 
-    useEffect(() => {
-        if (id) {
-            setApplicationId(id);
-            fetchApplication(id);
-        }
-    }, [id]);
-
-    const fetchApplication = async (idToCheck) => {
+    const fetchApplication = useCallback(async (idToCheck) => {
         try {
             setLoading(true);
             setError("");
@@ -33,7 +26,7 @@ function ApplicationStatus() {
             }
 
             const response = await fetch(
-                `https://backend-1df5.onrender.com/api/service-applications/${idToCheck}`,
+                `https://backend-1df5.onrender.com/api/service-applications/${encodeURIComponent(idToCheck)}`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`
@@ -43,7 +36,11 @@ function ApplicationStatus() {
 
             const data = await response.json();
 
-            if (!response.ok) {
+            if (response.status === 401) {
+                navigate("/login", { replace: true });
+                return;
+            }
+            if (!response.ok || !data.application) {
                 throw new Error(
                     data.message || "Application not found"
                 );
@@ -65,7 +62,18 @@ function ApplicationStatus() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [token, navigate]);
+
+    useEffect(() => {
+        if (id) {
+            setApplicationId(id);
+            fetchApplication(id);
+        } else {
+            setApplication(null);
+            setApplicationId("");
+            setError("");
+        }
+    }, [id, fetchApplication]);
 
     const handleCheckStatus = (e) => {
         e.preventDefault();
@@ -77,7 +85,11 @@ function ApplicationStatus() {
             return;
         }
 
-        fetchApplication(cleanId);
+        if (cleanId === id) {
+            fetchApplication(cleanId);
+        } else {
+            navigate(`/application-status/${encodeURIComponent(cleanId)}`);
+        }
     };
 
     const getStatusClass = (status) => {
@@ -85,6 +97,7 @@ function ApplicationStatus() {
             case "Pending":
                 return "status-pending";
 
+            case "In Progress":
             case "Under Review":
                 return "status-review";
 
@@ -102,34 +115,6 @@ function ApplicationStatus() {
         }
     };
 
-    const getStepClass = (step) => {
-        if (!application) return "";
-
-        const status = application.status;
-
-        const steps = [
-            "Pending",
-            "Under Review",
-            "Approved",
-            "Completed"
-        ];
-
-        if (status === "Rejected") {
-            return step === "Pending"
-                ? "completed"
-                : "";
-        }
-
-        const currentIndex = steps.indexOf(status);
-        const stepIndex = steps.indexOf(step);
-
-        if (stepIndex <= currentIndex) {
-            return "completed";
-        }
-
-        return "";
-    };
-
     return (
         <div className="application-status-page">
 
@@ -141,7 +126,7 @@ function ApplicationStatus() {
 
                     <div>
                         <h1>
-                            Application Status
+                            Application Details
                         </h1>
 
                         <p>
@@ -152,10 +137,10 @@ function ApplicationStatus() {
                     <button
                         className="dashboard-back-btn"
                         onClick={() =>
-                            navigate("/dashboard")
+                            navigate("/my-applications")
                         }
                     >
-                        ← Dashboard
+                        ← My Applications
                     </button>
 
                 </div>
@@ -227,6 +212,8 @@ function ApplicationStatus() {
                 </div>
 
 
+                {loading && <p role="status">Loading application details...</p>}
+
                 {/* APPLICATION RESULT */}
 
                 {application && (
@@ -255,7 +242,7 @@ function ApplicationStatus() {
                                     Application ID:
                                     <strong>
                                         {" "}
-                                        {application._id}
+                                        {application.applicationId || application._id}
                                     </strong>
                                 </p>
 
@@ -272,162 +259,22 @@ function ApplicationStatus() {
                         </div>
 
 
-                        {/* PROGRESS */}
-
-                        <div className="status-card">
-
+                        <div className="status-card" aria-live="polite">
                             <div className="card-title">
-
-                                <h2>
-                                    Application Progress
-                                </h2>
-
-                                <p>
-                                    Your application is currently{" "}
-                                    <strong>
-                                        {application.status}
-                                    </strong>.
-                                </p>
-
+                                <h2>Current Status</h2>
+                                <p>{application.status || "Pending"}</p>
                             </div>
-
-
-                            <div className="progress-container">
-
-                                <div className="progress-step">
-
-                                    <div
-                                        className={`progress-circle ${getStepClass(
-                                            "Pending"
-                                        )}`}
-                                    >
-                                        ✓
-                                    </div>
-
-                                    <div className="progress-content">
-
-                                        <h3>
-                                            Submitted
-                                        </h3>
-
-                                        <p>
-                                            Application has been
-                                            submitted successfully.
-                                        </p>
-
-                                    </div>
-
-                                </div>
-
-
-                                <div className="progress-line"></div>
-
-
-                                <div className="progress-step">
-
-                                    <div
-                                        className={`progress-circle ${getStepClass(
-                                            "Under Review"
-                                        )}`}
-                                    >
-                                        ✓
-                                    </div>
-
-                                    <div className="progress-content">
-
-                                        <h3>
-                                            Under Review
-                                        </h3>
-
-                                        <p>
-                                            Your application is being
-                                            reviewed by the department.
-                                        </p>
-
-                                    </div>
-
-                                </div>
-
-
-                                <div className="progress-line"></div>
-
-
-                                <div className="progress-step">
-
-                                    <div
-                                        className={`progress-circle ${getStepClass(
-                                            "Approved"
-                                        )}`}
-                                    >
-                                        ✓
-                                    </div>
-
-                                    <div className="progress-content">
-
-                                        <h3>
-                                            Approved
-                                        </h3>
-
-                                        <p>
-                                            Application approved by
-                                            the department.
-                                        </p>
-
-                                    </div>
-
-                                </div>
-
-
-                                <div className="progress-line"></div>
-
-
-                                <div className="progress-step">
-
-                                    <div
-                                        className={`progress-circle ${getStepClass(
-                                            "Completed"
-                                        )}`}
-                                    >
-                                        ✓
-                                    </div>
-
-                                    <div className="progress-content">
-
-                                        <h3>
-                                            Completed
-                                        </h3>
-
-                                        <p>
-                                            Service request has been
-                                            completed.
-                                        </p>
-
-                                    </div>
-
-                                </div>
-
-
-                                {application.status ===
-                                    "Rejected" && (
-
-                                    <div className="rejected-box">
-
-                                        <strong>
-                                            Application Rejected
-                                        </strong>
-
-                                        <p>
-                                            {application.adminRemark ||
-                                                "Your application has been rejected by the department."}
-                                        </p>
-
-                                    </div>
-                                )}
-
-                            </div>
-
+                            <p>Last updated: {application.updatedAt
+                                ? new Date(application.updatedAt).toLocaleString("en-IN")
+                                : "Not available"}</p>
+                            <h3>Department Remark</h3>
+                            <p>{application.adminRemark || "No remark has been added yet."}</p>
+                            <button type="button" className="dashboard-back-btn"
+                                disabled={loading}
+                                onClick={() => fetchApplication(application._id)}>
+                                Refresh Status
+                            </button>
                         </div>
-
 
                         {/* APPLICANT INFORMATION */}
 
@@ -450,7 +297,7 @@ function ApplicationStatus() {
                                     </span>
 
                                     <strong>
-                                        {application.applicantName ||
+                                        {application.citizenName || application.applicantName ||
                                             "—"}
                                     </strong>
 
@@ -464,7 +311,7 @@ function ApplicationStatus() {
                                     </span>
 
                                     <strong>
-                                        {application.email ||
+                                        {application.citizenEmail || application.email ||
                                             "—"}
                                     </strong>
 
@@ -478,7 +325,7 @@ function ApplicationStatus() {
                                     </span>
 
                                     <strong>
-                                        {application.phone ||
+                                        {application.citizenPhone || application.phone ||
                                             "—"}
                                     </strong>
 
@@ -575,8 +422,8 @@ function ApplicationStatus() {
                                     </span>
 
                                     <strong>
-                                        {application.purpose ||
-                                            "No purpose provided"}
+                                        {application.applicationData?.purpose || application.purpose || application.description ||
+                                            "Not recorded for this application"}
                                     </strong>
 
                                 </div>
@@ -589,8 +436,8 @@ function ApplicationStatus() {
                                     </span>
 
                                     <strong>
-                                        {application.additionalDetails ||
-                                            "No additional details"}
+                                        {application.applicationData?.additionalDetails || application.additionalDetails ||
+                                            "Not recorded for this application"}
                                     </strong>
 
                                 </div>

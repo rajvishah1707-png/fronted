@@ -173,6 +173,15 @@ function App() {
                 />
 
                 <Route
+                    path="/application-status/:id"
+                    element={
+                        <ProtectedRoute>
+                            <ApplicationStatus />
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
                     path="/application-status"
                     element={
                         <ProtectedRoute>

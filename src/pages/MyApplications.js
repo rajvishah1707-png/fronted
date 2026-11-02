@@ -124,7 +124,7 @@ function MyApplications() {
         }
 
         if (
-            value === "under review"
+            value === "under review" || value === "in progress"
         ) {
             return "status-review";
         }
@@ -226,6 +226,8 @@ function MyApplications() {
                             Under Review
                         </option>
 
+                        <option value="In Progress">In Progress</option>
+
                         <option value="Approved">
                             Approved
                         </option>
@@ -326,7 +328,7 @@ function MyApplications() {
                                                     {" "}
                                                     <strong>
                                                         {
-                                                            application._id
+                                                            application.applicationId || application._id
                                                         }
                                                     </strong>
                                                 </p>
@@ -359,6 +361,7 @@ function MyApplications() {
 
                                             <strong>
                                                 {
+                                                    application.citizenName ||
                                                     application.applicantName ||
                                                     "N/A"
                                                 }
@@ -373,6 +376,7 @@ function MyApplications() {
 
                                             <strong>
                                                 {
+                                                    application.citizenEmail ||
                                                     application.email ||
                                                     application.applicantEmail ||
                                                     "N/A"
