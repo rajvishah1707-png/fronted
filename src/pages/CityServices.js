@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./CityServices.css";
 
@@ -17,19 +17,16 @@ function CityServices() {
         useState(null);
 
 
-    const categories = [
-        "All",
-        "Utilities",
-        "Environment",
-        "Transport",
-        "Health",
-        "Education",
-        "Emergency",
-        "Government"
-    ];
+    const [categories, setCategories] = useState(["All"]);
+    useEffect(() => {
+        fetch("https://backend-1df5.onrender.com/api/services/categories")
+            .then(response => response.json())
+            .then(data => { if (data.success) setCategories(["All", ...data.categories]); })
+            .catch(() => {});
+    }, []);
 
 
-    const loadServices = async () => {
+    const loadServices = useCallback(async () => {
 
         try {
 
@@ -95,7 +92,7 @@ function CityServices() {
 
         }
 
-    };
+    }, [search, category]);
 
 
     useEffect(() => {
@@ -108,7 +105,7 @@ function CityServices() {
         return () =>
             clearTimeout(timer);
 
-    }, [search, category]);
+    }, [loadServices]);
 
 
     const openServiceDetails =

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./MyApplications.css";
 
@@ -15,7 +15,7 @@ function MyApplications() {
     const [filter, setFilter] = useState("All");
 
 
-    const loadApplications = async () => {
+    const loadApplications = useCallback(async () => {
 
         try {
 
@@ -82,14 +82,14 @@ function MyApplications() {
 
             setLoading(false);
         }
-    };
+    }, [navigate]);
 
 
     useEffect(() => {
 
         loadApplications();
 
-    }, []);
+    }, [loadApplications]);
 
 
     const filteredApplications =

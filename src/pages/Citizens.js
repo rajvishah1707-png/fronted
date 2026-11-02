@@ -1,3 +1,4 @@
+import { adminFetch } from "../utils/adminApi";
 import React, {
     useEffect,
     useState
@@ -118,7 +119,7 @@ const Citizens = () => {
 
 
             const response =
-                await fetch(
+                await adminFetch(
                     `${API_URL}/users`
                 );
 
@@ -383,7 +384,7 @@ const Citizens = () => {
 
 
             const response =
-                await fetch(
+                await adminFetch(
                     url,
                     {
 
@@ -490,7 +491,7 @@ const Citizens = () => {
         try {
 
             const response =
-                await fetch(
+                await adminFetch(
                     `${API_URL}/users/${citizen._id}`,
                     {
                         method: "DELETE"
@@ -562,7 +563,7 @@ const handleStatus = async (citizen) => {
     }
 
     try {
-        const response = await fetch(
+        const response = await adminFetch(
             `${API_URL}/users/${citizen._id}/status`,
             {
                 method: "PATCH",
@@ -756,6 +757,9 @@ const handleStatus = async (citizen) => {
     ===================================================== */
 
     const handleLogout = () => {
+        localStorage.removeItem("adminToken");
+        localStorage.removeItem("admin");
+        localStorage.removeItem("adminLoggedIn");
 
         localStorage.removeItem(
             "token"
@@ -776,7 +780,7 @@ const handleStatus = async (citizen) => {
 
 
         navigate(
-            "/login"
+            "/admin-login"
         );
 
     };

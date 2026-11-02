@@ -1,3 +1,4 @@
+import { adminFetch } from "../utils/adminApi";
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -35,7 +36,7 @@ const AdminApplications = () => {
             setLoading(true);
             setError("");
 
-            const response = await fetch(
+            const response = await adminFetch(
                 "https://backend-1df5.onrender.com/api/admin/applications"
             );
 
@@ -178,7 +179,7 @@ const AdminApplications = () => {
             setMessage("");
             setError("");
 
-            const response = await fetch(
+            const response = await adminFetch(
                 `https://backend-1df5.onrender.com/api/admin/applications/${application._id}/status`,
                 {
                     method: "PATCH",
@@ -268,7 +269,7 @@ const AdminApplications = () => {
             setMessage("");
             setError("");
 
-            const response = await fetch(
+            const response = await adminFetch(
                 `https://backend-1df5.onrender.com/api/admin/applications/${application._id}`,
                 {
                     method: "DELETE"
