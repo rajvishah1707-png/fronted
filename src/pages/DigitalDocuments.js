@@ -1,3 +1,4 @@
+import { openDocumentFile } from "../utils/documentFiles";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import "./DigitalDocuments.css";
 
@@ -256,86 +257,16 @@ const DigitalDocuments = () => {
     // VIEW
     // =========================
     const handleView = async (document) => {
-        try {
-            const token = getToken();
-
-            if (!document.filePath) {
-                alert("Document file not found.");
-                return;
-            }
-
-            const response = await fetch(
-                `https://backend-1df5.onrender.com${document.filePath}`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                }
-            );
-
-            if (!response.ok) {
-                throw new Error("Unable to open document.");
-            }
-
-            const blob = await response.blob();
-
-            const blobUrl = window.URL.createObjectURL(blob);
-
-            window.open(blobUrl, "_blank");
-
-            setTimeout(() => {
-                window.URL.revokeObjectURL(blobUrl);
-            }, 60000);
-        } catch (error) {
-            console.error("View Error:", error);
-            alert("Unable to open document.");
-        }
+        try { await openDocumentFile(document, false, false); }
+        catch (error) { alert(error.message || "Unable to access document."); }
     };
 
     // =========================
     // DOWNLOAD
     // =========================
     const handleDownload = async (document) => {
-        try {
-            const token = getToken();
-
-            const response = await fetch(
-                `https://backend-1df5.onrender.com${document.filePath}`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                }
-            );
-
-            if (!response.ok) {
-                throw new Error("Download failed.");
-            }
-
-            const blob = await response.blob();
-
-            const blobUrl = window.URL.createObjectURL(blob);
-
-            const link = window.document.createElement("a");
-
-            link.href = blobUrl;
-
-            link.download =
-                document.originalFileName ||
-                document.documentTitle ||
-                "document";
-
-            document.body.appendChild(link);
-
-            link.click();
-
-            link.remove();
-
-            window.URL.revokeObjectURL(blobUrl);
-        } catch (error) {
-            console.error("Download Error:", error);
-            alert("Unable to download document.");
-        }
+        try { await openDocumentFile(document, false, true); }
+        catch (error) { alert(error.message || "Unable to access document."); }
     };
 
     // =========================

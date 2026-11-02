@@ -1,3 +1,4 @@
+import ApplicationDocuments from "../components/ApplicationDocuments";
 import { adminFetch } from "../utils/adminApi";
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -21,6 +22,7 @@ const AdminApplications = () => {
     const [statusFilter, setStatusFilter] = useState("All");
     const [serviceFilter, setServiceFilter] = useState("All");
 
+    const [documentApplication, setDocumentApplication] = useState(null);
     const [editing, setEditing] = useState({});
     const [updatingId, setUpdatingId] = useState(null);
 
@@ -955,6 +957,7 @@ const AdminApplications = () => {
                                                         🗑 Delete
                                                     </button>
 
+                                                    <button className="update-btn" onClick={() => setDocumentApplication(application)}>Review Documents</button>
                                                     <button
                                                         className="update-btn"
                                                         disabled={
@@ -1093,6 +1096,8 @@ const AdminApplications = () => {
             {/* =================================================
                 CSS
             ================================================= */}
+
+            {documentApplication && <div className="application-document-overlay"><div className="application-document-dialog" role="dialog" aria-modal="true" aria-label="Review application documents"><button onClick={() => setDocumentApplication(null)}>Close Documents</button><h2>{documentApplication.applicationId || documentApplication._id}</h2><ApplicationDocuments applicationId={documentApplication._id} isAdmin /></div></div>}
 
             <style>{`
 

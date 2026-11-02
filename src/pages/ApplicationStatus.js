@@ -1,3 +1,4 @@
+import ApplicationDocuments from "../components/ApplicationDocuments";
 import React, { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import "./ApplicationStatus.css";
@@ -277,6 +278,8 @@ function ApplicationStatus() {
                         </div>
 
                         <div className="status-card"><h2>Service Payment</h2><p>Payment is available after approval when a payable fee has been assessed.</p><Link to="/payments">View Payment Status / Pay Fee →</Link></div>
+
+                        <ApplicationDocuments key={application._id} applicationId={application._id} />
 
                         {/* APPLICANT INFORMATION */}
 

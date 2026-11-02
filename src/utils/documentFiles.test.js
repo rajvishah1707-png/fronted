@@ -1,0 +1,12 @@
+import { openDocumentFile } from './documentFiles';
+import { adminFetch } from './adminApi';
+jest.mock('./adminApi',()=>({API_URL:'https://backend-1df5.onrender.com',adminFetch:jest.fn()}));
+let tab;
+beforeEach(()=>{jest.clearAllMocks();tab={opener:window,location:{replace:jest.fn()},close:jest.fn()};jest.spyOn(window,'open').mockReturnValue(tab);window.URL.createObjectURL=jest.fn().mockReturnValue('blob:private-file');window.URL.revokeObjectURL=jest.fn();jest.spyOn(HTMLAnchorElement.prototype,'click').mockImplementation(()=>{});localStorage.setItem('smartCityToken','citizen-token');global.fetch=jest.fn().mockResolvedValue({ok:true,blob:async()=>new Blob(['file'])});adminFetch.mockResolvedValue({ok:true,blob:async()=>new Blob(['file'])});});
+afterEach(()=>jest.restoreAllMocks());
+const documentRecord={filePath:'/api/digital-documents/file/proof.pdf',originalFileName:'proof.pdf'};
+test('citizen file requests carry the actual bearer token',async()=>{await openDocumentFile(documentRecord);expect(fetch.mock.calls[0][1].headers.Authorization).toBe('Bearer citizen-token');expect(tab.location.replace).toHaveBeenCalledWith('blob:private-file');expect(tab.opener).toBeNull();});
+test('admin file requests use the authenticated admin fetch wrapper',async()=>{await openDocumentFile(documentRecord,true);expect(adminFetch).toHaveBeenCalledWith('https://backend-1df5.onrender.com/api/digital-documents/file/proof.pdf');expect(fetch).not.toHaveBeenCalled();});
+test('downloads use the browser document, not the document metadata object',async()=>{await openDocumentFile(documentRecord,false,true);expect(HTMLAnchorElement.prototype.click).toHaveBeenCalled();expect(window.open).not.toHaveBeenCalled();});
+test('document tokens are never sent to an external origin',async()=>{await expect(openDocumentFile({filePath:'https://example.com/proof.pdf'})).rejects.toThrow('Invalid document file address');expect(fetch).not.toHaveBeenCalled();});
+test('unavailable files close the blank tab and explain the problem',async()=>{fetch.mockResolvedValue({ok:false,json:async()=>({message:'Please upload it again'})});await expect(openDocumentFile(documentRecord)).rejects.toThrow('Please upload it again');expect(tab.close).toHaveBeenCalled();});

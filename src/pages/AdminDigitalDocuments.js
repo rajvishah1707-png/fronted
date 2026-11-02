@@ -1,3 +1,4 @@
+import { openDocumentFile } from "../utils/documentFiles";
 import { adminFetch } from "../utils/adminApi";
 import React, { useCallback,
     useEffect,
@@ -635,34 +636,9 @@ const AdminDigitalDocuments = () => {
        VIEW FILE
     ===================================================== */
 
-    const openFile = (
-        document
-    ) => {
-
-        if (
-            !document ||
-            !document.fileName
-        ) {
-
-            alert(
-                "Document file is not available."
-            );
-
-            return;
-        }
-
-
-        const fileUrl =
-            `${API_URL}/file/${encodeURIComponent(
-                document.fileName
-            )}`;
-
-
-        window.open(
-            fileUrl,
-            "_blank",
-            "noopener,noreferrer"
-        );
+    const openFile = async (document) => {
+        try { await openDocumentFile(document, true); }
+        catch (error) { alert(error.message || "Unable to open document."); }
     };
 
 
