@@ -47,7 +47,7 @@ function AdminServices() {
             setError("");
 
             const response = await fetch(
-                "http://localhost:5000/api/services/admin/all"
+                "https://backend-1df5.onrender.com/api/services/admin/all"
             );
 
             const data = await response.json();
@@ -283,7 +283,7 @@ function AdminServices() {
             if (editingService) {
 
                 response = await fetch(
-                    `http://localhost:5000/api/services/${editingService._id}`,
+                    `https://backend-1df5.onrender.com/api/services/${editingService._id}`,
                     {
                         method: "PUT",
 
@@ -308,7 +308,7 @@ function AdminServices() {
             else {
 
                 response = await fetch(
-                    "http://localhost:5000/api/services",
+                    "https://backend-1df5.onrender.com/api/services",
                     {
                         method: "POST",
 
@@ -390,7 +390,7 @@ function AdminServices() {
 
             const response =
                 await fetch(
-                    `http://localhost:5000/api/services/${service._id}`,
+                    `https://backend-1df5.onrender.com/api/services/${service._id}`,
                     {
                         method: "DELETE"
                     }
@@ -447,7 +447,7 @@ function AdminServices() {
 
             const response =
                 await fetch(
-                    `http://localhost:5000/api/services/${service._id}`,
+                    `https://backend-1df5.onrender.com/api/services/${service._id}`,
                     {
                         method: "PUT",
 

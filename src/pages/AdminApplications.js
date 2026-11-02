@@ -36,7 +36,7 @@ const AdminApplications = () => {
             setError("");
 
             const response = await fetch(
-                "http://localhost:5000/api/admin/applications"
+                "https://backend-1df5.onrender.com/api/admin/applications"
             );
 
             const data = await response.json();
@@ -179,7 +179,7 @@ const AdminApplications = () => {
             setError("");
 
             const response = await fetch(
-                `http://localhost:5000/api/admin/applications/${application._id}/status`,
+                `https://backend-1df5.onrender.com/api/admin/applications/${application._id}/status`,
                 {
                     method: "PATCH",
                     headers: {
@@ -269,7 +269,7 @@ const AdminApplications = () => {
             setError("");
 
             const response = await fetch(
-                `http://localhost:5000/api/admin/applications/${application._id}`,
+                `https://backend-1df5.onrender.com/api/admin/applications/${application._id}`,
                 {
                     method: "DELETE"
                 }

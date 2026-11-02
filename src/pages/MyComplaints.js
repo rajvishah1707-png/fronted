@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 
 import "./MyComplaints.css";
 
-const API_URL = "http://localhost:5000";
+const API_URL = "https://backend-1df5.onrender.com";
 
 const MyComplaints = () => {
     const navigate = useNavigate();

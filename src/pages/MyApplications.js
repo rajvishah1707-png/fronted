@@ -37,7 +37,7 @@ function MyApplications() {
 
 
             const response = await fetch(
-                "http://localhost:5000/api/service-applications/my-applications",
+                "https://backend-1df5.onrender.com/api/service-applications/my-applications",
                 {
                     method: "GET",
 

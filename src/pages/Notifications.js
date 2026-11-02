@@ -6,7 +6,7 @@ import React, {
 import "./Notifications.css";
 
 const API_URL =
-    "http://localhost:5000";
+    "https://backend-1df5.onrender.com";
 
 const Notifications = () => {
 

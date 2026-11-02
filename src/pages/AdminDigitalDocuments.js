@@ -10,7 +10,7 @@ import "./AdminDigitalDocuments.css";
 
 
 const API_URL =
-    "http://localhost:5000/api/digital-documents";
+    "https://backend-1df5.onrender.com/api/digital-documents";
 
 
 const AdminDigitalDocuments = () => {

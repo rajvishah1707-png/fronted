@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import "./DigitalDocuments.css";
 
-const API_URL = "http://localhost:5000/api/digital-documents";
+const API_URL = "https://backend-1df5.onrender.com/api/digital-documents";
 
 const DigitalDocuments = () => {
     const fileInputRef = useRef(null);
@@ -265,7 +265,7 @@ const DigitalDocuments = () => {
             }
 
             const response = await fetch(
-                `http://localhost:5000${document.filePath}`,
+                `https://backend-1df5.onrender.com${document.filePath}`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`
@@ -300,7 +300,7 @@ const DigitalDocuments = () => {
             const token = getToken();
 
             const response = await fetch(
-                `http://localhost:5000${document.filePath}`,
+                `https://backend-1df5.onrender.com${document.filePath}`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`

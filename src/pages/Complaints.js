@@ -10,10 +10,10 @@ import "./Complaints.css";
 
 
 const API_URL =
-    "http://localhost:5000/api/admin/complaints";
+    "https://backend-1df5.onrender.com/api/admin/complaints";
 
 const SERVER_URL =
-    "http://localhost:5000";
+    "https://backend-1df5.onrender.com";
 
 
 const Complaints = () => {

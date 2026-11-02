@@ -124,7 +124,7 @@ function ApplyService() {
             setLoading(true);
 
             const response = await fetch(
-                "http://localhost:5000/api/service-applications",
+                "https://backend-1df5.onrender.com/api/service-applications",
                 {
                     method: "POST",
                     headers: {

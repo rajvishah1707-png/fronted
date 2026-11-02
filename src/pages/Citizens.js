@@ -11,11 +11,11 @@ import "./Citizens.css";
 
 
 const API_URL =
-    "http://localhost:5000/api/admin";
+    "https://backend-1df5.onrender.com/api/admin";
 
 
 const BACKEND_URL =
-    "http://localhost:5000";
+    "https://backend-1df5.onrender.com";
 
 
 const emptyForm = {

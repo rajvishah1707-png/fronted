@@ -102,7 +102,7 @@ const Register = () => {
 
         try {
             const response = await fetch(
-                "http://localhost:5000/api/auth/register",
+                "https://backend-1df5.onrender.com/api/auth/register",
                 {
                     method: "POST",
 

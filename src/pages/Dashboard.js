@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Dashboard.css";
 
-const API_URL = "http://localhost:5000";
+const API_URL = "https://backend-1df5.onrender.com";
 
 const Dashboard = () => {
     const navigate = useNavigate();

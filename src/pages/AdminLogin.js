@@ -38,7 +38,7 @@ const AdminLogin = () => {
 
         try {
             const response = await fetch(
-                "http://localhost:5000/api/auth/admin-login",
+                "https://backend-1df5.onrender.com/api/auth/admin-login",
                 {
                     method: "POST",
                     headers: {

@@ -157,7 +157,7 @@ const AIAssistant = () => {
 
                 const response =
                     await fetch(
-                        "http://localhost:5000/api/ai/chat",
+                        "https://backend-1df5.onrender.com/api/ai/chat",
                         {
                             method: "POST",
 

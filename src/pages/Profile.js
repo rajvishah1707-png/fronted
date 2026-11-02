@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Profile.css";
 
-const API_URL = "http://localhost:5000";
+const API_URL = "https://backend-1df5.onrender.com";
 
 const Profile = () => {
     const navigate = useNavigate();
