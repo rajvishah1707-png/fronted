@@ -168,48 +168,25 @@ const Profile = () => {
         }
 
         try {
-            /*
-             * Update profile information
-             */
-            const response = await fetch(
-                `${API_URL}/api/users/profile`,
-                {
-                    method: "PUT",
-
-                    headers: {
-                        "Content-Type":
-                            "application/json",
-
-                        Authorization:
-                            `Bearer ${token}`
-                    },
-
-                    body: JSON.stringify({
-                        name: formData.name,
-                        phone: formData.phone
-                    })
-                }
-            );
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(
-                    data.message ||
-                    "Unable to update profile"
-                );
+            const payload = new FormData();
+            payload.append("name", formData.name);
+            payload.append("phone", formData.phone);
+            if (selectedFile) {
+                payload.append("profileImage", selectedFile);
+            } else if (!profileImage) {
+                payload.append("removeProfileImage", "true");
             }
-
-            /*
-             * Updated user object
-             */
-            const updatedUser = {
-                ...user,
-                ...(data.user || {}),
-                name: formData.name,
-                phone: formData.phone,
-                profileImage: profileImage || ""
-            };
+            const response = await fetch(`${API_URL}/api/auth/profile`, {
+                method: "PUT",
+                headers: { Authorization: `Bearer ${token}` },
+                body: payload
+            });
+            const data = await response.json();
+            if (!response.ok || !data.user) {
+                throw new Error(data.message || "Unable to update profile");
+            }
+            const updatedUser = data.user;
+            setProfileImage(updatedUser.profileImage || "");
 
             /*
              * Save latest user information
@@ -241,27 +218,7 @@ const Profile = () => {
                 error
             );
 
-            /*
-             * If API fails, still keep
-             * profile changes locally.
-             */
-            const updatedUser = {
-                ...user,
-                name: formData.name,
-                phone: formData.phone,
-                profileImage: profileImage || ""
-            };
-
-            localStorage.setItem(
-                "smartCityUser",
-                JSON.stringify(updatedUser)
-            );
-
-            setUser(updatedUser);
-
-            setError(
-                "Server update failed. Your changes were saved locally."
-            );
+            setError(error.message || "Unable to save changes. Please try again.");
         } finally {
             setSaving(false);
         }
