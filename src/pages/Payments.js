@@ -16,6 +16,30 @@ function loadCheckout() {
     }).catch(error => { checkoutLoading = null; throw error; });
     return checkoutLoading;
 }
+let cashfreeLoading;
+function loadCashfree() {
+    if (window.Cashfree) return Promise.resolve();
+    if (!cashfreeLoading) {
+        cashfreeLoading = new Promise((resolve, reject) => {
+            const script = document.createElement("script");
+            const fail = () => {
+                clearTimeout(timer);
+                script.remove();
+                reject(new Error("Unable to load Cashfree checkout. Please retry."));
+            };
+            const timer = setTimeout(fail, 20000);
+            script.src = "https://sdk.cashfree.com/js/v3/cashfree.js";
+            script.onerror = fail;
+            script.onload = () => {
+                clearTimeout(timer);
+                if (window.Cashfree) resolve();
+                else fail();
+            };
+            document.body.appendChild(script);
+        }).catch(error => { cashfreeLoading = null; throw error; });
+    }
+    return cashfreeLoading;
+}
 export default function Payments({ isAdmin = false }) {
     const [data, setData] = useState({ rows: [], total: 0, configured: false });
     const [summary, setSummary] = useState(null);
@@ -42,8 +66,17 @@ export default function Payments({ isAdmin = false }) {
         finally { setBusy(""); }
     };
     const pay = row => action(row.application._id, async () => {
-        await loadCheckout();
         const result = await api("/api/payments/orders", { method: "POST", body: JSON.stringify({ applicationId: row.application._id }) });
+        if (result.provider === "cashfree") {
+            await loadCashfree();
+            const checkout = window.Cashfree({ mode: "sandbox" });
+            const outcome = await checkout.checkout({ paymentSessionId: result.sessionId, redirectTarget: "_modal" });
+            const verified = await api(`/api/payments/${result.paymentId}/refresh`, { method: "POST" });
+            if (verified.payment?.status === "Paid") setMessage("Test payment verified. Your receipt is available below.");
+            else setMessage(outcome?.error ? "Checkout did not complete. You can retry or refresh payment status." : "Payment is awaiting confirmation. Use Refresh Payment to check again.");
+            return;
+        }
+        await loadCheckout();
         await new Promise((resolve, reject) => {
             let settled = false;
             const checkout = new window.Razorpay({
@@ -67,13 +100,17 @@ export default function Payments({ isAdmin = false }) {
         action(application._id, () => api(`/api/payments/applications/${application._id}/fee`, { method: "PATCH", body: JSON.stringify({ amount }) }, true));
     };
     const recover = payment => {
+        if (payment.provider === "cashfree") {
+            action(payment._id, () => api(`/api/payments/${payment._id}/recover-order`, { method: "POST", body: "{}" }, true));
+            return;
+        }
         const orderId = window.prompt(`Find receipt ${payment.receipt} in Razorpay Test Mode and enter its matching Order ID. Do not create a second order.`);
         if (orderId) action(payment._id, () => api(`/api/payments/${payment._id}/recover-order`, { method: "POST", body: JSON.stringify({ orderId }) }, true));
     };
     const rows = data.rows.filter(row => `${row.application.applicationId} ${row.application.serviceName} ${row.application.citizenName} ${row.status} ${row.payment?.paymentId || ""}`.toLowerCase().includes(query.toLowerCase()));
     return <ManagementLayout title={isAdmin ? "Payment Management" : "My Payments"} isAdmin={isAdmin} subtitle="Service fees, verified transactions and payment receipts.">
-        <div className="management-success">Razorpay Test Mode · No real money is collected. Payment becomes available after application approval.</div>
-        {!loading && !data.configured && <p className="management-error">Test checkout is not configured. The administrator must add Razorpay test keys on the backend.</p>}
+        <div className="management-success">{data.provider === "cashfree" ? "Cashfree Sandbox" : "Razorpay Test Mode"} · No real money is collected. Payment becomes available after application approval.</div>
+        {!loading && !data.configured && <p className="management-error">Test checkout is not configured. The administrator must add sandbox payment keys on the backend.</p>}
         {summary && <div className="management-stats">{[["Total collected (net)", money(summary.totalPaise)], ["Today (India)", money(summary.todayPaise)], ["Pending applications", summary.pending], ["Failed orders", summary.failed]].map(([label, value]) => <div className="management-stat" key={label}><span>{label}</span><strong>{value}</strong></div>)}</div>}
         <div className="management-actions"><label>Search this page<input value={query} onChange={e => setQuery(e.target.value)} placeholder="Application, service, citizen or status" /></label><button className="secondary" onClick={load} disabled={loading || Boolean(busy)}>Refresh List</button></div>
         {error && <p role="alert" className="management-error">{error}</p>}{message && <p role="status" className="management-success">{message}</p>}
