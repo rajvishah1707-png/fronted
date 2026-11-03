@@ -1,0 +1,42 @@
+import { renderHook, act } from '@testing-library/react';
+import useLiveRefresh from './useLiveRefresh';
+beforeEach(() => jest.useFakeTimers());
+afterEach(() => jest.useRealTimers());
+const settle = async () => { await act(async () => { await Promise.resolve(); }); };
+test('loads immediately, refreshes periodically and on return, then cleans up', async () => {
+    const refresh = jest.fn().mockResolvedValue();
+    const { unmount } = renderHook(() => useLiveRefresh(refresh));
+    await settle();
+    expect(refresh).toHaveBeenLastCalledWith(false);
+    await act(async () => { jest.advanceTimersByTime(10000); });
+    expect(refresh).toHaveBeenLastCalledWith(true);
+    await act(async () => { window.dispatchEvent(new Event('focus')); });
+    expect(refresh).toHaveBeenCalledTimes(3);
+    unmount();
+    await act(async () => { jest.advanceTimersByTime(20000); window.dispatchEvent(new Event('focus')); });
+    expect(refresh).toHaveBeenCalledTimes(3);
+});
+test('does not overlap a slow API call and retries after failure', async () => {
+    let reject;
+    const refresh = jest.fn().mockImplementationOnce(() => new Promise((resolve, fail) => { reject = fail; })).mockResolvedValue();
+    renderHook(() => useLiveRefresh(refresh));
+    await act(async () => { jest.advanceTimersByTime(30000); window.dispatchEvent(new Event('focus')); });
+    expect(refresh).toHaveBeenCalledTimes(1);
+    await act(async () => { reject(new Error('offline')); });
+    await act(async () => { jest.advanceTimersByTime(10000); });
+    expect(refresh).toHaveBeenCalledTimes(2);
+});
+test('pauses hidden pages and uses the latest callback on return', async () => {
+    const first = jest.fn().mockResolvedValue();
+    const next = jest.fn().mockResolvedValue();
+    const { rerender } = renderHook(({ callback }) => useLiveRefresh(callback), { initialProps: { callback: first } });
+    await settle();
+    rerender({ callback: next });
+    const visibility = jest.spyOn(document, 'visibilityState', 'get').mockReturnValue('hidden');
+    await act(async () => { jest.advanceTimersByTime(10000); });
+    expect(next).not.toHaveBeenCalled();
+    visibility.mockReturnValue('visible');
+    await act(async () => { document.dispatchEvent(new Event('visibilitychange')); });
+    expect(next).toHaveBeenCalledWith(true);
+    visibility.mockRestore();
+});

@@ -43,22 +43,23 @@ export default function ApplicationDocuments({ applicationId, isAdmin = false })
         <h2>Application Documents</h2>
         {loading && <p role="status">Loading linked documents...</p>}{error && <p className="document-error" role="alert">{error}</p>}{notice && <p role="status">{notice}</p>}
         {data && !loading && <>
+            <p><strong>Application status:</strong> {data.applicationStatus || "Unavailable"}</p>
             {data.legacy && <p className="document-note">This older application has no original document requirement snapshot. Existing documents are not linked automatically.</p>}
             {data.requirements.length > 0 && <p><strong>Required:</strong> {data.requirements.join(", ")}</p>}
             {!data.documents.length && <p>No documents are linked to this application.</p>}
             {data.documents.map((item, index) => <article className="linked-document" key={`${item.requirement}-${index}`}>
                 <strong>{item.requirement}</strong>
-                {item.document ? <><p>{item.document.documentTitle} · <span>{item.document.status}</span></p><p>{item.document.documentId}</p>
+                {item.document ? <><p>{item.document.documentTitle} · <span>Document verification: {item.document.status}</span></p><p>{item.document.documentId}</p>
                     {item.document.adminRemark && <p><strong>Admin remark:</strong> {item.document.adminRemark}</p>}
-                    <div className="document-actions"><button type="button" className="document-action" disabled={busy} onClick={() => viewFile(item.document)}>View File</button>
-                        <button type="button" className="document-action" disabled={busy} onClick={() => viewFile(item.document, true)}>Download</button>
-                        {isAdmin && <><button type="button" className="document-action" disabled={busy || item.document.status === "Verified"} onClick={() => review(item.document, "verify")}>Verify Document</button><button type="button" className="document-action" disabled={busy || item.document.status === "Rejected"} onClick={() => review(item.document, "reject")}>Reject Document</button></>}
+                    <div className="application-file-actions"><button type="button" className="application-file-action" disabled={busy} onClick={() => viewFile(item.document)}>View File</button>
+                        <button type="button" className="application-file-action" disabled={busy} onClick={() => viewFile(item.document, true)}>Download</button>
+                        {isAdmin && <><button type="button" className="application-file-action" disabled={busy || item.document.status === "Verified"} onClick={() => review(item.document, "verify")}>Verify Document</button><button type="button" className="application-file-action" disabled={busy || item.document.status === "Rejected"} onClick={() => review(item.document, "reject")}>Reject Document</button></>}
                     </div></> : <p className="document-error">The linked document is missing. The citizen must replace it before approval.</p>}
             </article>)}
-            {data.canEdit && !editing && <button type="button" className="document-action" disabled={busy} onClick={() => setEditing(true)}>Add / Replace Documents</button>}
-            {editing && <form onSubmit={save}><DocumentSelector requirements={data.requirements} value={selection} onChange={setSelection} onBusyChange={setBusy} disabled={busy}/><div className="document-actions"><button className="document-action" type="submit" disabled={busy}>Save Linked Documents</button><button className="document-action" type="button" disabled={busy} onClick={() => setEditing(false)}>Cancel</button></div></form>}
-            <button type="button" className="document-action" disabled={busy || loading} onClick={load}>Refresh Review Status</button>
-            {isAdmin && <p className="document-note">Verify all linked files before changing the application to Approved. Rejecting a file does not reject the entire application.</p>}
+            {data.canEdit && !editing && <button type="button" className="application-file-action" disabled={busy} onClick={() => setEditing(true)}>Add / Replace Documents</button>}
+            {editing && <form onSubmit={save}><DocumentSelector requirements={data.requirements} value={selection} onChange={setSelection} onBusyChange={setBusy} disabled={busy}/><div className="application-file-actions"><button className="application-file-action" type="submit" disabled={busy}>Save Linked Documents</button><button className="application-file-action" type="button" disabled={busy} onClick={() => setEditing(false)}>Cancel</button></div></form>}
+            <button type="button" className="application-file-action" disabled={busy || loading} onClick={load}>Refresh Review Status</button>
+            {isAdmin && <p className="document-note">Verify all linked files before changing the application to In Progress, Approved or Completed. Use Under Review while checking files. Rejecting a file does not reject the entire application.</p>}
         </>}
     </section>;
 }

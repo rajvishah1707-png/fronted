@@ -1,3 +1,4 @@
+import useLiveRefresh from "../hooks/useLiveRefresh";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Dashboard.css";
@@ -16,6 +17,8 @@ const Dashboard = () => {
 
     const [applicationCount, setApplicationCount] = useState(0);
     const [pendingCount, setPendingCount] = useState(0);
+    const [inProgressCount, setInProgressCount] = useState(0);
+    const [applicationError, setApplicationError] = useState("");
     const [approvedCount, setApprovedCount] = useState(0);
     const [completedCount, setCompletedCount] = useState(0);
 
@@ -73,7 +76,7 @@ const Dashboard = () => {
                     parsedUser.profileImage || ""
             });
 
-            loadApplications(token);
+
 
         } catch (error) {
             console.error(
@@ -105,6 +108,7 @@ const Dashboard = () => {
                 `${API_URL}/api/service-applications/my-applications`,
                 {
                     method: "GET",
+                    cache: "no-store",
                     headers: {
                         "Content-Type":
                             "application/json",
@@ -117,6 +121,8 @@ const Dashboard = () => {
             const data =
                 await response.json();
 
+            if (!response.ok || !data.success) throw new Error(data.message || "Unable to refresh applications");
+            setApplicationError("");
             if (
                 data.success &&
                 Array.isArray(data.applications)
@@ -136,6 +142,8 @@ const Dashboard = () => {
                     ).length
                 );
 
+                setInProgressCount(applications.filter(item => item.status === "In Progress").length);
+
                 setApprovedCount(
                     applications.filter(
                         (application) =>
@@ -154,12 +162,18 @@ const Dashboard = () => {
             }
 
         } catch (error) {
+            setApplicationError(error.message || "Unable to refresh applications");
             console.error(
                 "Application loading error:",
                 error
             );
         }
     };
+
+    useLiveRefresh(() => {
+        const token = localStorage.getItem("smartCityToken");
+        if (token) return loadApplications(token);
+    });
 
     /* =========================================
        LOGOUT
@@ -863,6 +877,7 @@ const Dashboard = () => {
 
                 <div className="summary-grid">
 
+                    {applicationError && <p role="alert">{applicationError}. Retrying automatically.</p>}
                     <div className="summary-card">
 
                         <strong>
@@ -888,6 +903,8 @@ const Dashboard = () => {
 
                     </div>
 
+
+                    <div className="summary-card"><strong>{inProgressCount}</strong><span>In Progress</span></div>
 
                     <div className="summary-card">
 

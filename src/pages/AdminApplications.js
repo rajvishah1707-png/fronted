@@ -25,6 +25,7 @@ const AdminApplications = () => {
     const [documentApplication, setDocumentApplication] = useState(null);
     const [editing, setEditing] = useState({});
     const [updatingId, setUpdatingId] = useState(null);
+    const [updateErrorId, setUpdateErrorId] = useState(null);
 
     const [message, setMessage] = useState("");
     const [error, setError] = useState("");
@@ -178,6 +179,7 @@ const AdminApplications = () => {
 
         try {
             setUpdatingId(application._id);
+            setUpdateErrorId(null);
             setMessage("");
             setError("");
 
@@ -205,16 +207,12 @@ const AdminApplications = () => {
                 );
             }
 
+            if (!data.success || !data.application) throw new Error("Server did not confirm the saved application. Refresh and try again.");
+
             setApplications((previous) =>
                 previous.map((item) =>
                     item._id === application._id
-                        ? {
-                              ...item,
-                              status,
-                              adminRemark,
-                              updatedAt:
-                                  new Date().toISOString()
-                          }
+                        ? data.application
                         : item
                 )
             );
@@ -242,10 +240,13 @@ const AdminApplications = () => {
                 err
             );
 
-            setError(
-                err.message ||
-                "Unable to update application."
-            );
+            setEditing(previous => {
+                const copy = { ...previous };
+                delete copy[application._id];
+                return copy;
+            });
+            setUpdateErrorId(application._id);
+            setError(`Application ${application.applicationId}: ${err.message || "Unable to update application."} Status was not changed. Verify linked files before In Progress / Approved / Completed, or select Under Review.`);
         } finally {
             setUpdatingId(null);
         }
@@ -424,7 +425,7 @@ const AdminApplications = () => {
             )}
 
             {error && (
-                <div className="alert danger">
+                <div className="alert danger" role="alert">
                     <span>!</span>
                     {error}
                 </div>
@@ -980,6 +981,7 @@ const AdminApplications = () => {
 
                                             </div>
 
+                                            {updateErrorId === application._id && error && <p role="alert" style={{ color: "#b42318", marginBottom: 12 }}>{error}</p>}
                                             <div className="update-grid">
 
                                                 <div className="control-group">

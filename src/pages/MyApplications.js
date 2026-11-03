@@ -1,4 +1,5 @@
-import React, { useCallback, useEffect, useState } from "react";
+import useLiveRefresh from "../hooks/useLiveRefresh";
+import React, { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./MyApplications.css";
 
@@ -15,11 +16,11 @@ function MyApplications() {
     const [filter, setFilter] = useState("All");
 
 
-    const loadApplications = useCallback(async () => {
+    const loadApplications = useCallback(async (silent = false) => {
 
         try {
 
-            setLoading(true);
+            if (!silent) setLoading(true);
 
             setError("");
 
@@ -40,6 +41,7 @@ function MyApplications() {
                 "https://backend-1df5.onrender.com/api/service-applications/my-applications",
                 {
                     method: "GET",
+                    cache: "no-store",
 
                     headers: {
                         Authorization:
@@ -85,12 +87,7 @@ function MyApplications() {
     }, [navigate]);
 
 
-    useEffect(() => {
-
-        loadApplications();
-
-    }, [loadApplications]);
-
+    useLiveRefresh(loadApplications);
 
     const filteredApplications =
         filter === "All"
