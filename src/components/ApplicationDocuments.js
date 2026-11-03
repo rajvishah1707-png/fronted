@@ -57,10 +57,11 @@ export default function ApplicationDocuments({ applicationId, isAdmin = false })
                         {isAdmin && <><button type="button" className="application-file-action" disabled={busy || item.document.status === "Verified"} onClick={() => review(item.document, "verify")}>Verify Document</button><button type="button" className="application-file-action" disabled={busy || item.document.status === "Rejected"} onClick={() => review(item.document, "reject")}>Reject Document</button></>}
                     </div></> : <p className="document-error">The linked document is missing. The citizen must replace it before approval.</p>}
             </article>)}
+            {data.canEdit && !isAdmin && data.applicationStatus === "Rejected" && <p className="document-note">After saving replacement documents, the application stays Rejected until an administrator reviews it again.</p>}
             {data.canEdit && !editing && <button type="button" className="application-file-action" disabled={busy} onClick={() => setEditing(true)}>Add / Replace Documents</button>}
             {editing && <ValidatedForm onSubmit={save}><DocumentSelector requirements={data.requirements} value={selection} onChange={setSelection} onBusyChange={setBusy} disabled={busy}/><div className="application-file-actions"><button className="application-file-action" type="submit" disabled={busy}>Save Linked Documents</button><button className="application-file-action" type="button" disabled={busy} onClick={() => setEditing(false)}>Cancel</button></div></ValidatedForm>}
             <button type="button" className="application-file-action" disabled={busy || loading} onClick={load}>Refresh Review Status</button>
-            {isAdmin && <p className="document-note">Verify all linked files before changing the application to In Progress, Approved or Completed. Use Under Review while checking files. Rejecting a file does not reject the entire application.</p>}
+            {isAdmin && <p className="document-note">Verify all linked files before changing the application to In Progress, Approved or Completed. Use Under Review while checking files. After verification, close this panel, select In Progress and click Update Application to save the application status separately. Rejecting a file does not reject the entire application.</p>}
         </>}
     </section>;
 }

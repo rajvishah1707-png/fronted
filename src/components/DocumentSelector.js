@@ -34,7 +34,7 @@ export default function DocumentSelector({ requirements = [], value, onChange, o
     };
     const labels = requirements.length ? requirements : ["Supporting Document"];
     return <div className="application-documents">
-        <p>Select an existing document or upload a new PDF/JPG/PNG (maximum 5 MB each). Pending documents can be submitted; the administrator verifies them before approval.</p>
+        <p>Select an existing document or upload a new PDF/JPG/PNG (maximum 5 MB each). After upload, the file is selected automatically. Use the submit or save button below to link it to this application. The administrator reviews linked files.</p>
         {loading && <p role="status">Loading your documents...</p>}
         {error && <p className="document-error" role="alert">{error}</p>}{notice && <p role="status">{notice}</p>}
         {labels.map((requirement, index) => <div className="document-picker" key={requirement}>
