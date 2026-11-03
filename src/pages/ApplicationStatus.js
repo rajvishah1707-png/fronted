@@ -1,3 +1,4 @@
+import useLiveRefresh from "../hooks/useLiveRefresh";
 import ApplicationDocuments from "../components/ApplicationDocuments";
 import React, { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -15,11 +16,11 @@ function ApplicationStatus() {
 
     const token = localStorage.getItem("smartCityToken");
 
-    const fetchApplication = useCallback(async (idToCheck) => {
+    const fetchApplication = useCallback(async (idToCheck, silent = false) => {
         try {
-            setLoading(true);
+            if (!silent) setLoading(true);
             setError("");
-            setApplication(null);
+            if (!silent) setApplication(null);
 
             if (!token) {
                 navigate("/login");
@@ -29,6 +30,7 @@ function ApplicationStatus() {
             const response = await fetch(
                 `https://backend-1df5.onrender.com/api/service-applications/${encodeURIComponent(idToCheck)}`,
                 {
+                    cache: "no-store",
                     headers: {
                         Authorization: `Bearer ${token}`
                     }
@@ -68,13 +70,15 @@ function ApplicationStatus() {
     useEffect(() => {
         if (id) {
             setApplicationId(id);
-            fetchApplication(id);
+
         } else {
             setApplication(null);
             setApplicationId("");
             setError("");
         }
     }, [id, fetchApplication]);
+
+    useLiveRefresh(silent => id ? fetchApplication(id, silent) : undefined, id);
 
     const handleCheckStatus = (e) => {
         e.preventDefault();
