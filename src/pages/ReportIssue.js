@@ -1,3 +1,4 @@
+import ValidatedForm, { FormField } from "../components/ValidatedForm";
 import { api } from "../utils/adminApi";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -121,12 +122,12 @@ const ReportsIssue = () => {
                         </div>
                     )}
 
-                    <form onSubmit={handleSubmit}>
+                    <ValidatedForm onSubmit={handleSubmit}>
 
                         <div className="form-group">
                             <label>Issue Title *</label>
 
-                            <input
+                            <FormField as="input" rules={{ label: "Issue title", required: true, minLength: 3 }}
                                 type="text"
                                 name="title"
                                 value={formData.title}
@@ -138,7 +139,7 @@ const ReportsIssue = () => {
                         <div className="form-group">
                             <label>Issue Category *</label>
 
-                            <select
+                            <FormField as="select" rules={{ label: "Issue category", required: true }}
                                 name="category"
                                 value={formData.category}
                                 onChange={handleChange}
@@ -174,13 +175,13 @@ const ReportsIssue = () => {
                                 <option value="Other">
                                     Other
                                 </option>
-                            </select>
+                            </FormField>
                         </div>
 
                         <div className="form-group">
                             <label>Location *</label>
 
-                            <input
+                            <FormField as="input" rules={{ label: "Issue location", required: true }}
                                 type="text"
                                 name="location"
                                 value={formData.location}
@@ -192,7 +193,7 @@ const ReportsIssue = () => {
                         <div className="form-group">
                             <label>Description *</label>
 
-                            <textarea
+                            <FormField as="textarea" rules={{ label: "Description", required: true, minLength: 10 }}
                                 name="description"
                                 value={formData.description}
                                 onChange={handleChange}
@@ -209,7 +210,7 @@ const ReportsIssue = () => {
                             {busy ? "Submitting..." : "Submit Complaint"}
                         </button>
 
-                    </form>
+                    </ValidatedForm>
                 </div>
 
             </div>

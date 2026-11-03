@@ -1,3 +1,4 @@
+import { FormField } from "./ValidatedForm";
 import React, { useCallback, useEffect, useState } from "react";
 import { api } from "../utils/adminApi";
 import "./ApplicationDocuments.css";
@@ -38,11 +39,11 @@ export default function DocumentSelector({ requirements = [], value, onChange, o
         {error && <p className="document-error" role="alert">{error}</p>}{notice && <p role="status">{notice}</p>}
         {labels.map((requirement, index) => <div className="document-picker" key={requirement}>
             <label htmlFor={`document-select-${index}`}>{requirement}{requirements.length > 0 ? " *" : " (Optional)"}</label>
-            <select id={`document-select-${index}`} required={requirements.length > 0} disabled={disabled || loading || Boolean(uploading)}
+            <FormField as="select" rules={{ required: requirements.length > 0 }} id={`document-select-${index}`}  disabled={disabled || loading || Boolean(uploading)}
                 value={value.find(item => item.requirement === requirement)?.document || ""} onChange={e => select(requirement, e.target.value)}>
                 <option value="">Select a document</option>
                 {documents.filter(item => item.status !== "Rejected").map(item => <option value={item._id} key={item._id}>{item.documentTitle} · {item.documentType} · {item.status}</option>)}
-            </select>
+            </FormField>
             <label className="document-upload-label">Or upload {requirement}
                 <input type="file" accept="application/pdf,image/jpeg,image/png" disabled={disabled || loading || Boolean(uploading)} onChange={e => upload(requirement, e.target.files?.[0], e.target)} />
             </label>

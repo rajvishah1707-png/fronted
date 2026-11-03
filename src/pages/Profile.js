@@ -1,3 +1,4 @@
+import ValidatedForm, { FormField } from "../components/ValidatedForm";
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Profile.css";
@@ -534,7 +535,7 @@ const Profile = () => {
                         FORM
                     ========================= */}
 
-                    <form
+                    <ValidatedForm
                         className="profile-form"
                         onSubmit={handleSave}
                     >
@@ -545,7 +546,7 @@ const Profile = () => {
                                 Full Name
                             </label>
 
-                            <input
+                            <FormField as="input" rules={{ required: true, label: "Full name", minLength: 2 }}
                                 type="text"
                                 name="name"
                                 value={formData.name}
@@ -553,7 +554,7 @@ const Profile = () => {
                                     handleChange
                                 }
                                 placeholder="Enter your name"
-                                required
+                                
                             />
 
                         </div>
@@ -580,7 +581,7 @@ const Profile = () => {
                                 Mobile Number
                             </label>
 
-                            <input
+                            <FormField as="input" rules={{ label: "Mobile number", pattern: /^\d{10}$/, patternMessage: "Enter a 10-digit mobile number." }}
                                 type="tel"
                                 name="phone"
                                 value={
@@ -634,7 +635,7 @@ const Profile = () => {
 
                         </div>
 
-                    </form>
+                    </ValidatedForm>
 
                 </div>
 

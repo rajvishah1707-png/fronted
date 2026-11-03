@@ -1,3 +1,4 @@
+import ValidatedForm, { FormField } from "../components/ValidatedForm";
 import { openDocumentFile } from "../utils/documentFiles";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import "./DigitalDocuments.css";
@@ -650,7 +651,7 @@ const DigitalDocuments = () => {
 
                         </div>
 
-                        <form
+                        <ValidatedForm
                             className="document-upload-form"
                             onSubmit={handleUpload}
                         >
@@ -663,13 +664,13 @@ const DigitalDocuments = () => {
                                     <span>*</span>
                                 </label>
 
-                                <select
+                                <FormField as="select" rules={{ required: true }}
                                     name="documentType"
                                     value={
                                         formData.documentType
                                     }
                                     onChange={handleChange}
-                                    required
+                                    
                                 >
 
                                     <option value="">
@@ -712,7 +713,7 @@ const DigitalDocuments = () => {
                                         Other
                                     </option>
 
-                                </select>
+                                </FormField>
 
                             </div>
 
@@ -724,7 +725,7 @@ const DigitalDocuments = () => {
                                     <span>*</span>
                                 </label>
 
-                                <input
+                                <FormField as="input" rules={{ maxLength: "100", required: true, label: "Document title", minLength: 2 }}
                                     type="text"
                                     name="documentTitle"
                                     value={
@@ -732,8 +733,8 @@ const DigitalDocuments = () => {
                                     }
                                     onChange={handleChange}
                                     placeholder="Enter document title"
-                                    maxLength="100"
-                                    required
+                                    
+                                    
                                 />
 
                             </div>
@@ -745,7 +746,7 @@ const DigitalDocuments = () => {
                                     Description
                                 </label>
 
-                                <textarea
+                                <FormField as="textarea" rules={{ maxLength: "500" }}
                                     name="description"
                                     value={
                                         formData.description
@@ -753,7 +754,7 @@ const DigitalDocuments = () => {
                                     onChange={handleChange}
                                     placeholder="Enter document description..."
                                     rows="4"
-                                    maxLength="500"
+                                    
                                 />
 
                             </div>
@@ -768,12 +769,12 @@ const DigitalDocuments = () => {
 
                                 <div className="file-upload-box">
 
-                                    <input
+                                    <FormField as="input" rules={{ required: true, label: "Document file", maxBytes: 5 * 1024 * 1024, fileTypes: ["application/pdf", "image/jpeg", "image/jpg", "image/png"] }}
                                         ref={fileInputRef}
                                         type="file"
                                         accept=".pdf,.jpg,.jpeg,.png"
                                         onChange={handleFileChange}
-                                        required
+                                        
                                     />
 
                                     <div className="file-upload-content">
@@ -834,7 +835,7 @@ const DigitalDocuments = () => {
 
                             </div>
 
-                        </form>
+                        </ValidatedForm>
 
                     </div>
 

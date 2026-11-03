@@ -1,3 +1,4 @@
+import ValidatedForm, { FormField } from "../components/ValidatedForm";
 import React, { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -359,7 +360,7 @@ const Register = () => {
                         </div>
                     )}
 
-                    <form onSubmit={handleSubmit}>
+                    <ValidatedForm onSubmit={handleSubmit}>
 
                         <div className="form-group register-photo-group">
                             <label htmlFor="register-profile-image">
@@ -378,7 +379,7 @@ const Register = () => {
                                     </div>
                                 )}
                                 <div className="register-photo-actions">
-                                    <input
+                                    <FormField as="input" rules={{ label: "Profile photo", maxBytes: 5 * 1024 * 1024, fileTypes: ["image/jpeg", "image/png", "image/webp"] }}
                                         ref={profileImageInputRef}
                                         id="register-profile-image"
                                         type="file"
@@ -413,7 +414,7 @@ const Register = () => {
                                     👤
                                 </span>
 
-                                <input
+                                <FormField as="input" rules={{ label: "Full name", required: true, minLength: 2 }}
                                     type="text"
                                     name="name"
                                     value={formData.name}
@@ -440,7 +441,7 @@ const Register = () => {
                                     ✉
                                 </span>
 
-                                <input
+                                <FormField as="input" rules={{ label: "Email address", required: true }}
                                     type="email"
                                     name="email"
                                     value={formData.email}
@@ -467,13 +468,13 @@ const Register = () => {
                                     📱
                                 </span>
 
-                                <input
+                                <FormField as="input" rules={{ maxLength: "10", label: "Mobile number", required: true, pattern: /^\d{10}$/, patternMessage: "Enter a 10-digit mobile number." }}
                                     type="tel"
                                     name="phone"
                                     value={formData.phone}
                                     onChange={handleChange}
                                     placeholder="Enter 10-digit mobile number"
-                                    maxLength="10"
+                                    
                                     inputMode="numeric"
                                     autoComplete="tel"
                                 />
@@ -496,7 +497,7 @@ const Register = () => {
                                     🏠
                                 </span>
 
-                                <textarea
+                                <FormField as="textarea" rules={{ label: "Address", required: true }}
                                     name="address"
                                     value={formData.address}
                                     onChange={handleChange}
@@ -525,7 +526,7 @@ const Register = () => {
                                         🏙️
                                     </span>
 
-                                    <input
+                                    <FormField as="input" rules={{ label: "City", required: true }}
                                         type="text"
                                         name="city"
                                         value={formData.city}
@@ -550,13 +551,13 @@ const Register = () => {
                                         📍
                                     </span>
 
-                                    <input
+                                    <FormField as="input" rules={{ maxLength: "6", label: "Pincode", required: true, pattern: /^\d{6}$/, patternMessage: "Enter a 6-digit pincode." }}
                                         type="tel"
                                         name="pincode"
                                         value={formData.pincode}
                                         onChange={handleChange}
                                         placeholder="380001"
-                                        maxLength="6"
+                                        
                                         inputMode="numeric"
                                         autoComplete="postal-code"
                                     />
@@ -581,7 +582,7 @@ const Register = () => {
                                     🔒
                                 </span>
 
-                                <input
+                                <FormField as="input" rules={{ label: "Password", required: true, minLength: 6 }}
                                     type="password"
                                     name="password"
                                     value={formData.password}
@@ -608,7 +609,7 @@ const Register = () => {
                                     🔐
                                 </span>
 
-                                <input
+                                <FormField as="input" rules={{ label: "Confirm password", required: true, matches: "password", matchMessage: "Password and confirm password do not match." }}
                                     type="password"
                                     name="confirmPassword"
                                     value={formData.confirmPassword}
@@ -634,7 +635,7 @@ const Register = () => {
                             }
                         </button>
 
-                    </form>
+                    </ValidatedForm>
 
                     {/* LOGIN */}
 

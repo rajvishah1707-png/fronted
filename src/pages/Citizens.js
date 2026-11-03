@@ -1,3 +1,4 @@
+import ValidatedForm, { FormField } from "../components/ValidatedForm";
 import { adminFetch } from "../utils/adminApi";
 import React, {
     useEffect,
@@ -1512,7 +1513,7 @@ const handleStatus = async (citizen) => {
                             </div>
 
 
-                            <form
+                            <ValidatedForm
                                 onSubmit={
                                     handleSubmit
                                 }
@@ -1526,7 +1527,7 @@ const handleStatus = async (citizen) => {
                                             Full Name *
                                         </label>
 
-                                        <input
+                                        <FormField as="input" rules={{ required: true, label: "Citizen name", minLength: 2 }}
                                             type="text"
                                             name="name"
                                             value={
@@ -1536,7 +1537,7 @@ const handleStatus = async (citizen) => {
                                                 handleChange
                                             }
                                             placeholder="Enter full name"
-                                            required
+                                            
                                         />
 
                                     </div>
@@ -1548,7 +1549,7 @@ const handleStatus = async (citizen) => {
                                             Email *
                                         </label>
 
-                                        <input
+                                        <FormField as="input" rules={{ required: true, label: "Email address" }}
                                             type="email"
                                             name="email"
                                             value={
@@ -1558,7 +1559,7 @@ const handleStatus = async (citizen) => {
                                                 handleChange
                                             }
                                             placeholder="Enter email"
-                                            required
+                                            
                                         />
 
                                     </div>
@@ -1570,7 +1571,7 @@ const handleStatus = async (citizen) => {
                                             Phone *
                                         </label>
 
-                                        <input
+                                        <FormField as="input" rules={{ required: true, label: "Phone number", pattern: /^\d{10}$/, patternMessage: "Enter a 10-digit mobile number." }}
                                             type="text"
                                             name="phone"
                                             value={
@@ -1580,7 +1581,7 @@ const handleStatus = async (citizen) => {
                                                 handleChange
                                             }
                                             placeholder="Enter phone"
-                                            required
+                                            
                                         />
 
                                     </div>
@@ -1613,7 +1614,7 @@ const handleStatus = async (citizen) => {
                                             Pincode
                                         </label>
 
-                                        <input
+                                        <FormField as="input" rules={{ label: "Pincode", pattern: /^\d{6}$/, patternMessage: "Enter a 6-digit pincode." }}
                                             type="text"
                                             name="pincode"
                                             value={
@@ -1638,7 +1639,7 @@ const handleStatus = async (citizen) => {
                                             }
                                         </label>
 
-                                        <input
+                                        <FormField as="input" rules={{ required: !editingCitizen, label: "Password", minLength: 6 }}
                                             type="password"
                                             name="password"
                                             value={
@@ -1652,9 +1653,7 @@ const handleStatus = async (citizen) => {
                                                     ? "Leave blank to keep current password"
                                                     : "Enter password"
                                             }
-                                            required={
-                                                !editingCitizen
-                                            }
+                                            
                                         />
 
                                     </div>
@@ -1718,7 +1717,7 @@ const handleStatus = async (citizen) => {
 
                                 </div>
 
-                            </form>
+                            </ValidatedForm>
 
                         </div>
 
