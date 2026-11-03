@@ -1,0 +1,75 @@
+import React from 'react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import Login from './Login';
+const mockNavigate = jest.fn();
+const mockLocation = { state: null };
+jest.mock('react-router-dom', () => ({ useNavigate: () => mockNavigate, useLocation: () => mockLocation }));
+const enter = (label, value) => fireEvent.change(screen.getByLabelText(label), { target: { value } });
+const send = () => fireEvent.click(screen.getByRole('button', { name: 'Send Login OTP' }));
+beforeEach(() => {
+    localStorage.clear();
+    jest.clearAllMocks();
+    global.fetch = jest.fn(async () => ({ ok: true, text: async () => JSON.stringify({ success: true }) }));
+});
+afterEach(() => { delete global.fetch; });
+test('empty form uses an accessible JavaScript error and focuses the email', () => {
+    render(<Login />);
+    expect(screen.getByLabelText('Email Address').closest('form')).toHaveAttribute('novalidate');
+    send();
+    expect(screen.getByRole('alert')).toHaveTextContent('Please enter your email address.');
+    expect(screen.getByLabelText('Email Address')).toHaveFocus();
+    expect(global.fetch).not.toHaveBeenCalled();
+});
+test('malformed email and missing password never reach the API', () => {
+    render(<Login />);
+    enter('Email Address', 'invalid-email');
+    send();
+    expect(screen.getByRole('alert')).toHaveTextContent('valid email address');
+    enter('Email Address', 'citizen@example.com');
+    send();
+    expect(screen.getByRole('alert')).toHaveTextContent('Please enter your password.');
+    expect(screen.getByLabelText('Password')).toHaveFocus();
+    expect(global.fetch).not.toHaveBeenCalled();
+});
+test('valid credentials preserve the OTP endpoint and incomplete OTP is blocked', async () => {
+    render(<Login />);
+    enter('Email Address', ' Citizen@Example.com ');
+    enter('Password', 'existing-password');
+    send();
+    await screen.findByLabelText('Email Verification Code');
+    expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining('/request-login-otp'), expect.objectContaining({ body: JSON.stringify({ email: 'citizen@example.com', password: 'existing-password' }) }));
+    enter('Email Verification Code', '123');
+    fireEvent.click(screen.getByRole('button', { name: 'Verify OTP & Login' }));
+    expect(screen.getByRole('alert')).toHaveTextContent('exactly 6 digits');
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+});
+test('valid OTP still stores the server login and navigates to the dashboard', async () => {
+    render(<Login />);
+    enter('Email Address', 'citizen@example.com');
+    enter('Password', 'existing-password');
+    send();
+    await screen.findByLabelText('Email Verification Code');
+    global.fetch.mockResolvedValueOnce({ ok: true, text: async () => JSON.stringify({ token: 'test-token', user: { name: 'Citizen', role: 'citizen' } }) });
+    enter('Email Verification Code', '123456');
+    fireEvent.click(screen.getByRole('button', { name: 'Verify OTP & Login' }));
+    await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/dashboard', { replace: true }));
+    expect(localStorage.getItem('smartCityToken')).toBe('test-token');
+});
+test('forgot password validates email, new password length and confirmation with JavaScript', async () => {
+    render(<Login />);
+    fireEvent.click(screen.getByRole('button', { name: 'Forgot password?' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Send Password Reset OTP' }));
+    expect(screen.getByRole('alert')).toHaveTextContent('Please enter your email address.');
+    enter('Email Address', 'citizen@example.com');
+    fireEvent.click(screen.getByRole('button', { name: 'Send Password Reset OTP' }));
+    await screen.findByLabelText('Email Verification Code');
+    enter('Email Verification Code', '123456');
+    enter('New Password', 'short');
+    fireEvent.click(screen.getByRole('button', { name: 'Reset Password' }));
+    expect(screen.getByRole('alert')).toHaveTextContent('at least 8 characters');
+    enter('New Password', 'new-password');
+    enter('Confirm New Password', 'different-password');
+    fireEvent.click(screen.getByRole('button', { name: 'Reset Password' }));
+    expect(screen.getByRole('alert')).toHaveTextContent('do not match');
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+});
