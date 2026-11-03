@@ -28,4 +28,17 @@
 .management-page .management-table-wrap { overflow:auto; }.management-page table { width:100%; border-collapse:collapse; text-align:left; }.management-page th,.management-page td { border-bottom:1px solid #e2eaf1; padding:13px 10px; }
 .management-page .receipt { max-width:740px; margin:24px auto; }
 @media(max-width:650px) { .management-header { flex-direction:column; align-items:flex-start; }.management-page { padding:24px 14px; } }
-@media print { body:has(.receipt) * { visibility:hidden; } body:has(.receipt) .receipt,body:has(.receipt) .receipt * { visibility:visible; } body:has(.receipt) .receipt { position:absolute; left:0; top:0; width:100%; margin:0; border:0; } .receipt .management-actions { display:none; } }
+ .receipt-header { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap; }
+.receipt-header h2 { margin:8px 0 0; }
+.receipt-status { background:#e5f6ed; color:#145c39; border-radius:24px; padding:6px 12px; font-weight:600; }
+.receipt-amount { display:grid; gap:6px; background:#edf6fb; border-radius:10px; padding:16px; margin-top:18px; }
+.receipt-amount strong { font-size:2rem; line-height:1.2; }
+.receipt-test { color:#76511b; font-size:.875rem; }
+.receipt-details { border-top:1px solid #d7e4ee; padding-top:16px; }
+@media print {
+    body:has(.receipt) .management-page { background:white; padding:0; max-width:none; }
+    body:has(.receipt) .management-page > :not(main),
+    body:has(.receipt) .management-page main > :not(.receipt),
+    .receipt .management-actions { display:none; }
+    .management-page .receipt { width:auto; max-width:none; margin:0; border:0; box-shadow:none; }
+}

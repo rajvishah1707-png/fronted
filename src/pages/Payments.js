@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import ManagementLayout from "../components/ManagementLayout";
 import { api, money } from "../utils/adminApi";
@@ -49,6 +49,10 @@ export default function Payments({ isAdmin = false }) {
     const [error, setError] = useState("");
     const [message, setMessage] = useState("");
     const [receipt, setReceipt] = useState(null);
+    const receiptPanel = useRef(null);
+    useEffect(() => {
+        if (receipt) receiptPanel.current?.focus();
+    }, [receipt]);
     const [query, setQuery] = useState("");
     const load = useCallback(async () => {
         setLoading(true); setError("");
@@ -114,6 +118,39 @@ export default function Payments({ isAdmin = false }) {
         {summary && <div className="management-stats">{[["Total collected (net)", money(summary.totalPaise)], ["Today (India)", money(summary.todayPaise)], ["Pending applications", summary.pending], ["Failed orders", summary.failed]].map(([label, value]) => <div className="management-stat" key={label}><span>{label}</span><strong>{value}</strong></div>)}</div>}
         <div className="management-actions"><label>Search this page<input value={query} onChange={e => setQuery(e.target.value)} placeholder="Application, service, citizen or status" /></label><button className="secondary" onClick={load} disabled={loading || Boolean(busy)}>Refresh List</button></div>
         {error && <p role="alert" className="management-error">{error}</p>}{message && <p role="status" className="management-success">{message}</p>}
+        {receipt && (
+            <section ref={receiptPanel} tabIndex={-1} className="management-card receipt" aria-label="Payment receipt">
+                <header className="receipt-header">
+                    <div>
+                        <span className="management-eyebrow">SMART CITY · CITIZEN SERVICES</span>
+                        <h2>Smart City Payment Receipt</h2>
+                    </div>
+                    <span className="receipt-status">Verified</span>
+                </header>
+                <div className="receipt-amount">
+                    <span>Amount paid</span>
+                    <strong>{money(receipt.amountPaise)}</strong>
+                </div>
+                <p className="receipt-test">TEST PAYMENT · Not valid as proof of a real payment</p>
+                <dl className="management-grid receipt-details">
+                    {[
+                        ["Receipt number", receipt.receipt],
+                        ["Application ID", receipt.applicationReference],
+                        ["Citizen", receipt.citizenName],
+                        ["Service", receipt.serviceName],
+                        ["Transaction ID", receipt.paymentId],
+                        ["Paid on", receipt.paidAt ? new Date(receipt.paidAt).toLocaleString("en-IN") : null],
+                        ["Refund recorded", money(receipt.refundedPaise)]
+                    ].map(([label, value]) => (
+                        <div key={label}><dt>{label}</dt><dd>{value || "—"}</dd></div>
+                    ))}
+                </dl>
+                <div className="management-actions">
+                    <button onClick={() => window.print()}>Print / Save PDF</button>
+                    <button className="secondary" onClick={() => setReceipt(null)}>Close Receipt</button>
+                </div>
+            </section>
+        )}
         {loading ? <p role="status">Loading payments...</p> : rows.length === 0 ? <p className="management-card">No matching applications on this page.</p> : rows.map(row => {
             const a = row.application, p = row.payment;
             return <article className="management-card" key={a._id}>
@@ -132,6 +169,6 @@ export default function Payments({ isAdmin = false }) {
             </article>;
         })}
         <div className="management-actions"><button className="secondary" disabled={page === 1 || loading || Boolean(busy)} onClick={() => setPage(page - 1)}>Previous</button><span>Page {page} · {data.total} applications</span><button className="secondary" disabled={page * 25 >= data.total || loading || Boolean(busy)} onClick={() => setPage(page + 1)}>Next</button></div>
-        {receipt && <section className="management-card receipt" aria-label="Payment receipt"><h2>Smart City Payment Receipt</h2><p>TEST PAYMENT · Not valid as proof of a real payment</p><dl className="management-grid">{[["Receipt", receipt.receipt], ["Application", receipt.applicationReference], ["Citizen", receipt.citizenName], ["Service", receipt.serviceName], ["Amount", money(receipt.amountPaise)], ["Payment ID", receipt.paymentId], ["Paid on", receipt.paidAt ? new Date(receipt.paidAt).toLocaleString("en-IN") : "—"], ["Refund recorded", money(receipt.refundedPaise)]].map(([key, value]) => <div key={key}><dt>{key}</dt><dd>{value}</dd></div>)}</dl><div className="management-actions"><button onClick={() => window.print()}>Print / Save PDF</button><button className="secondary" onClick={() => setReceipt(null)}>Close Receipt</button></div></section>}
+
     </ManagementLayout>;
 }
