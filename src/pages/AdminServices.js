@@ -1,3 +1,4 @@
+import ValidatedForm, { FormField } from "../components/ValidatedForm";
 import { API_URL, adminFetch } from "../utils/adminApi";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -889,7 +890,7 @@ function AdminServices() {
                         </div>
 
 
-                        <form
+                        <ValidatedForm
                             onSubmit={
                                 handleSubmit
                             }
@@ -904,7 +905,7 @@ function AdminServices() {
                                         Service Name *
                                     </label>
 
-                                    <input
+                                    <FormField as="input" rules={{ label: "Service name", required: true }}
                                         name="name"
                                         value={
                                             form.name
@@ -925,7 +926,7 @@ function AdminServices() {
                                     </label>
 
                                     <datalist id="saved-service-categories">{categoryOptions.map(name => <option key={name} value={name} />)}</datalist>
-                                    <input
+                                    <FormField as="input" rules={{ label: "Service category", required: true }}
                                         name="category"
                                         list="saved-service-categories"
                                         value={
@@ -1026,7 +1027,7 @@ function AdminServices() {
                                         Description *
                                     </label>
 
-                                    <textarea
+                                    <FormField as="textarea" rules={{ label: "Service description", required: true }}
                                         name="description"
                                         value={
                                             form.description
@@ -1159,7 +1160,7 @@ function AdminServices() {
 
                             </div>
 
-                        </form>
+                        </ValidatedForm>
 
                     </div>
 

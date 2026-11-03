@@ -1,3 +1,4 @@
+import ValidatedForm, { FormField } from "../components/ValidatedForm";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./AdminLogin.css";
@@ -234,7 +235,7 @@ const AdminLogin = () => {
                         </div>
                     )}
 
-                    <form onSubmit={handleSubmit}>
+                    <ValidatedForm onSubmit={handleSubmit}>
 
                         {/* EMAIL */}
 
@@ -250,7 +251,7 @@ const AdminLogin = () => {
                                     ✉
                                 </span>
 
-                                <input
+                                <FormField as="input" rules={{ label: "Email address", required: true }}
                                     type="email"
                                     value={email}
                                     onChange={(e) => {
@@ -287,7 +288,7 @@ const AdminLogin = () => {
                                     🔒
                                 </span>
 
-                                <input
+                                <FormField as="input" rules={{ label: "Password", required: true }}
                                     type={
                                         showPassword
                                             ? "text"
@@ -342,7 +343,7 @@ const AdminLogin = () => {
 
                         </button>
 
-                    </form>
+                    </ValidatedForm>
 
                     {/* SECURITY NOTE */}
 

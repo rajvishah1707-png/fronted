@@ -1,0 +1,16 @@
+.form-validation-error {
+    background: #fff1f2;
+    border: 1px solid #fda4af;
+    border-radius: 8px;
+    color: #9f1239;
+    padding: 12px 14px;
+    margin: 0 0 16px;
+    font-size: 14px;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+    grid-column: 1 / -1;
+}
+input[aria-invalid="true"], select[aria-invalid="true"], textarea[aria-invalid="true"] {
+    border-color: #dc2626;
+    outline-color: #dc2626;
+}

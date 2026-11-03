@@ -1,3 +1,4 @@
+import ValidatedForm from "./ValidatedForm";
 import React, { useCallback, useEffect, useState } from "react";
 import { api } from "../utils/adminApi";
 import { openDocumentFile } from "../utils/documentFiles";
@@ -57,7 +58,7 @@ export default function ApplicationDocuments({ applicationId, isAdmin = false })
                     </div></> : <p className="document-error">The linked document is missing. The citizen must replace it before approval.</p>}
             </article>)}
             {data.canEdit && !editing && <button type="button" className="application-file-action" disabled={busy} onClick={() => setEditing(true)}>Add / Replace Documents</button>}
-            {editing && <form onSubmit={save}><DocumentSelector requirements={data.requirements} value={selection} onChange={setSelection} onBusyChange={setBusy} disabled={busy}/><div className="application-file-actions"><button className="application-file-action" type="submit" disabled={busy}>Save Linked Documents</button><button className="application-file-action" type="button" disabled={busy} onClick={() => setEditing(false)}>Cancel</button></div></form>}
+            {editing && <ValidatedForm onSubmit={save}><DocumentSelector requirements={data.requirements} value={selection} onChange={setSelection} onBusyChange={setBusy} disabled={busy}/><div className="application-file-actions"><button className="application-file-action" type="submit" disabled={busy}>Save Linked Documents</button><button className="application-file-action" type="button" disabled={busy} onClick={() => setEditing(false)}>Cancel</button></div></ValidatedForm>}
             <button type="button" className="application-file-action" disabled={busy || loading} onClick={load}>Refresh Review Status</button>
             {isAdmin && <p className="document-note">Verify all linked files before changing the application to In Progress, Approved or Completed. Use Under Review while checking files. Rejecting a file does not reject the entire application.</p>}
         </>}

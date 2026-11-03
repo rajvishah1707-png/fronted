@@ -1,3 +1,4 @@
+import ValidatedForm, { FormField } from "../components/ValidatedForm";
 import React, {
     useCallback,
     useEffect,
@@ -895,7 +896,7 @@ const MyComplaints = () => {
 
                     </div>
 
-                    <form
+                    <ValidatedForm
                         onSubmit={
                             submitComplaint
                         }
@@ -911,7 +912,7 @@ const MyComplaints = () => {
                                     Category *
                                 </label>
 
-                                <select
+                                <FormField as="select" rules={{ required: true }}
                                     name="category"
                                     value={
                                         form.category
@@ -919,7 +920,7 @@ const MyComplaints = () => {
                                     onChange={
                                         handleChange
                                     }
-                                    required
+                                    
                                 >
 
                                     <option value="">
@@ -962,7 +963,7 @@ const MyComplaints = () => {
                                         Other
                                     </option>
 
-                                </select>
+                                </FormField>
 
                             </div>
 
@@ -1012,7 +1013,7 @@ const MyComplaints = () => {
                                     Subject *
                                 </label>
 
-                                <input
+                                <FormField as="input" rules={{ required: true, label: "Complaint subject", minLength: 3 }}
                                     type="text"
                                     name="subject"
                                     value={
@@ -1022,7 +1023,7 @@ const MyComplaints = () => {
                                         handleChange
                                     }
                                     placeholder="Enter complaint subject"
-                                    required
+                                    
                                 />
 
                             </div>
@@ -1035,7 +1036,7 @@ const MyComplaints = () => {
                                     Description *
                                 </label>
 
-                                <textarea
+                                <FormField as="textarea" rules={{ required: true, label: "Description", minLength: 10 }}
                                     name="description"
                                     value={
                                         form.description
@@ -1045,7 +1046,7 @@ const MyComplaints = () => {
                                     }
                                     placeholder="Describe the issue in detail..."
                                     rows="5"
-                                    required
+                                    
                                 />
 
                             </div>
@@ -1189,7 +1190,7 @@ const MyComplaints = () => {
                                 : "📢 Submit Complaint"}
                         </button>
 
-                    </form>
+                    </ValidatedForm>
 
                 </section>
 

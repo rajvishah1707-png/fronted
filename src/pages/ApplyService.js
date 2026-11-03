@@ -1,3 +1,4 @@
+import ValidatedForm from "../components/ValidatedForm";
 import DocumentSelector from "../components/DocumentSelector";
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -331,7 +332,7 @@ function ApplyService() {
                         )}
 
 
-                        <form onSubmit={handleSubmit}>
+                        <ValidatedForm onSubmit={handleSubmit}>
                             <h3>Supporting Documents</h3>
                             <DocumentSelector requirements={service.requiredDocuments || []} value={documents} onChange={setDocuments} onBusyChange={setDocumentUploadBusy} disabled={loading || documentUploadBusy} />
 
@@ -495,7 +496,7 @@ function ApplyService() {
                                     : "Submit Application"}
                             </button>
 
-                        </form>
+                        </ValidatedForm>
 
                     </div>
 

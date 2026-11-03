@@ -1,3 +1,4 @@
+import ValidatedForm, { FormField } from "./components/ValidatedForm";
 import React, { useState } from "react";
 
 function Login() {
@@ -27,7 +28,7 @@ function Login() {
           Login to Smart City Portal
         </p>
 
-        <form onSubmit={handleLogin}>
+        <ValidatedForm onSubmit={handleLogin}>
 
           <div className="mb-5">
 
@@ -35,7 +36,7 @@ function Login() {
               Email
             </label>
 
-            <input
+            <FormField as="input" rules={{ label: "Email address", required: true }}
               type="email"
               value={email}
               onChange={(e) =>
@@ -53,7 +54,7 @@ function Login() {
               Password
             </label>
 
-            <input
+            <FormField as="input" rules={{ label: "Password", required: true }}
               type="password"
               value={password}
               onChange={(e) =>
@@ -72,7 +73,7 @@ function Login() {
             Login
           </button>
 
-        </form>
+        </ValidatedForm>
 
       </div>
 

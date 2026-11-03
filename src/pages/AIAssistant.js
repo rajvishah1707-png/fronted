@@ -418,14 +418,13 @@ const AIAssistant = () => {
 
                         <textarea
                             aria-label="Your question"
-                            maxLength={2000}
                             value={
                                 message
                             }
                             onChange={
                                 e =>
                                     setMessage(
-                                        e.target.value
+                                        e.target.value.slice(0, 2000)
                                     )
                             }
                             onKeyDown={

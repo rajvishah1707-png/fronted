@@ -1,3 +1,4 @@
+import ValidatedForm, { FormField } from "../components/ValidatedForm";
 import useLiveRefresh from "../hooks/useLiveRefresh";
 import ApplicationDocuments from "../components/ApplicationDocuments";
 import React, { useCallback, useEffect, useState } from "react";
@@ -170,7 +171,7 @@ function ApplicationStatus() {
                             the latest status.
                         </p>
 
-                        <form
+                        <ValidatedForm
                             onSubmit={handleCheckStatus}
                             className="status-check-form"
                         >
@@ -181,7 +182,7 @@ function ApplicationStatus() {
 
                             <div className="status-input-row">
 
-                                <input
+                                <FormField as="input" rules={{ label: "Application ID", required: true }}
                                     type="text"
                                     value={applicationId}
                                     onChange={(e) =>
@@ -203,7 +204,7 @@ function ApplicationStatus() {
 
                             </div>
 
-                        </form>
+                        </ValidatedForm>
 
 
                         {error && (
