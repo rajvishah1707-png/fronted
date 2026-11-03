@@ -88,19 +88,41 @@ const Login = () => {
         return () => window.clearTimeout(timer);
     }, [resendCountdown]);
 
-    const requestOtp = async (isResend = false) => {
-        if (flow === "login" && (!email.trim() || !password)) {
-            setError("Please enter your email and password.");
-            return;
+    const validateFields = (currentStep) => {
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const fail = (message, inputId) => {
+            setSuccess("");
+            setError(message);
+            document.getElementById(inputId)?.focus();
+            return false;
+        };
+
+        if (currentStep === "credentials" || currentStep === "resetEmail") {
+            const isLogin = currentStep === "credentials";
+            const value = (isLogin ? email : resetEmail).trim();
+            const inputId = isLogin ? "login-email" : "reset-email";
+            if (!value) return fail("Please enter your email address.", inputId);
+            if (!emailPattern.test(value)) return fail("Please enter a valid email address.", inputId);
+            // Login must continue to accept existing passwords without imposing new strength rules.
+            if (isLogin && !password.trim()) return fail("Please enter your password.", "login-password");
         }
 
-        if (
-            flow === "forgot" &&
-            !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(resetEmail.trim())
-        ) {
-            setError("Please enter a valid email address.");
-            return;
+        if (currentStep === "otp") {
+            if (!otp.trim()) return fail("Please enter the OTP sent to your email.", "login-otp");
+            if (!/^\d{6}$/.test(otp.trim())) return fail("OTP must contain exactly 6 digits.", "login-otp");
+            if (flow === "forgot") {
+                if (!newPassword.trim()) return fail("Please enter your new password.", "new-password");
+                if (newPassword.length < 8) return fail("Password must contain at least 8 characters.", "new-password");
+                if (!confirmPassword) return fail("Please confirm your new password.", "confirm-password");
+                if (newPassword !== confirmPassword) return fail("Password and confirm password do not match.", "confirm-password");
+            }
         }
+        setError("");
+        return true;
+    };
+
+    const requestOtp = async (isResend = false) => {
+        if (loading || !validateFields(flow === "login" ? "credentials" : "resetEmail")) return;
 
         setError("");
         setSuccess("");
@@ -145,10 +167,7 @@ const Login = () => {
     };
 
     const verifyLoginOtp = async () => {
-        if (!/^\d{6}$/.test(otp.trim())) {
-            setError("Please enter the 6-digit OTP sent to your email.");
-            return;
-        }
+        if (loading || !validateFields("otp")) return;
 
         setError("");
         setSuccess("");
@@ -194,20 +213,7 @@ const Login = () => {
     };
 
     const resetPassword = async () => {
-        if (!/^\d{6}$/.test(otp.trim())) {
-            setError("Please enter the 6-digit OTP sent to your email.");
-            return;
-        }
-
-        if (newPassword.length < 8) {
-            setError("Password must contain at least 8 characters.");
-            return;
-        }
-
-        if (newPassword !== confirmPassword) {
-            setError("Password and confirm password do not match.");
-            return;
-        }
+        if (loading || !validateFields("otp")) return;
 
         setError("");
         setSuccess("");
@@ -312,9 +318,9 @@ const Login = () => {
                 )}
 
                 {success && <div className="login-success">{success}</div>}
-                {error && <div className="login-error">⚠️ {error}</div>}
+                {error && <div className="login-error" role="alert">⚠️ {error}</div>}
 
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={handleSubmit} noValidate>
                     {step === "credentials" ? (
                         <>
                             <div className="login-form-group">
@@ -329,7 +335,7 @@ const Login = () => {
                                     }}
                                     placeholder="Enter your registered email"
                                     autoComplete="username"
-                                    required
+                                    aria-required="true"
                                 />
                             </div>
                             <div className="login-form-group">
@@ -344,7 +350,7 @@ const Login = () => {
                                     }}
                                     placeholder="Enter your password"
                                     autoComplete="current-password"
-                                    required
+                                    aria-required="true"
                                 />
                             </div>
                         </>
@@ -361,7 +367,7 @@ const Login = () => {
                                 }}
                                 placeholder="Enter your registered email"
                                 autoComplete="email"
-                                required
+                                aria-required="true"
                             />
                         </div>
                     ) : (
@@ -381,8 +387,7 @@ const Login = () => {
                                     placeholder="Enter 6-digit OTP"
                                     autoComplete="one-time-code"
                                     inputMode="numeric"
-                                    maxLength={6}
-                                    required
+                                    aria-required="true"
                                 />
                             </div>
 
@@ -400,8 +405,7 @@ const Login = () => {
                                             }}
                                             placeholder="At least 8 characters"
                                             autoComplete="new-password"
-                                            minLength={8}
-                                            required
+                                            aria-required="true"
                                         />
                                     </div>
                                     <div className="login-form-group">
@@ -418,8 +422,7 @@ const Login = () => {
                                             }}
                                             placeholder="Re-enter your new password"
                                             autoComplete="new-password"
-                                            minLength={8}
-                                            required
+                                            aria-required="true"
                                         />
                                     </div>
                                 </>
