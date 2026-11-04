@@ -459,3 +459,32 @@
         grid-column: auto;
     }
 }
+
+.status-payment-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 14px;
+}
+.status-payment-button {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 15px;
+    border: 1px solid #b6cedf;
+    border-radius: 8px;
+    background: white;
+    color: #075477;
+    font: inherit;
+    font-weight: 600;
+    text-decoration: none;
+}
+.status-payment-button.primary {
+    background: #087eab;
+    border-color: #087eab;
+    color: white;
+}
+.status-payment-button:disabled {
+    background: #edf2f7;
+    color: #52667a;
+    cursor: not-allowed;
+}

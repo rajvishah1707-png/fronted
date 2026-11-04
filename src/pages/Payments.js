@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import ManagementLayout from "../components/ManagementLayout";
 import { api, money } from "../utils/adminApi";
 let checkoutLoading;
@@ -41,6 +41,8 @@ function loadCashfree() {
     return cashfreeLoading;
 }
 export default function Payments({ isAdmin = false }) {
+    const [params] = useSearchParams();
+    const applicationId = params.get("applicationId");
     const [data, setData] = useState({ rows: [], total: 0, configured: false });
     const [summary, setSummary] = useState(null);
     const [page, setPage] = useState(1);
@@ -57,12 +59,14 @@ export default function Payments({ isAdmin = false }) {
     const load = useCallback(async () => {
         setLoading(true); setError("");
         try {
-            const result = await api(`/api/payments?page=${page}`, {}, isAdmin);
+            const query = new URLSearchParams({ page: applicationId ? "1" : String(page) });
+            if (applicationId) query.set("applicationId", applicationId);
+            const result = await api(`/api/payments?${query}`, {}, isAdmin);
             setData(result);
             if (isAdmin) setSummary((await api("/api/payments/summary", {}, true)).summary);
         } catch (e) { setError(e.message); }
         finally { setLoading(false); }
-    }, [page, isAdmin]);
+    }, [page, isAdmin, applicationId]);
     useEffect(() => { load(); }, [load]);
     const action = async (id, fn) => {
         setBusy(id); setError(""); setMessage("");
@@ -168,7 +172,7 @@ export default function Payments({ isAdmin = false }) {
                 </div>
             </article>;
         })}
-        <div className="management-actions"><button className="secondary" disabled={page === 1 || loading || Boolean(busy)} onClick={() => setPage(page - 1)}>Previous</button><span>Page {page} · {data.total} applications</span><button className="secondary" disabled={page * 25 >= data.total || loading || Boolean(busy)} onClick={() => setPage(page + 1)}>Next</button></div>
+        {!applicationId && <div className="management-actions"><button className="secondary" disabled={page === 1 || loading || Boolean(busy)} onClick={() => setPage(page - 1)}>Previous</button><span>Page {page} · {data.total} applications</span><button className="secondary" disabled={page * 25 >= data.total || loading || Boolean(busy)} onClick={() => setPage(page + 1)}>Next</button></div>}
 
     </ManagementLayout>;
 }

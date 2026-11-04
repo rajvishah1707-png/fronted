@@ -4,6 +4,45 @@ import ApplicationDocuments from "../components/ApplicationDocuments";
 import React, { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import "./ApplicationStatus.css";
+import { api, money } from "../utils/adminApi";
+
+function ServicePayment({ applicationId }) {
+    const [payment, setPayment] = useState(null);
+    const [error, setError] = useState(false);
+    const query = new URLSearchParams({ applicationId });
+    const destination = `/payments?${query}`;
+
+    useLiveRefresh(async () => {
+        try {
+            const data = await api(`/api/payments?${query}`, { cache: "no-store" });
+            const row = data.rows.find(item => item.application._id === applicationId);
+            setPayment(row ? { ...row, configured: data.configured } : null);
+            setError(!row);
+        } catch {
+            setError(true);
+        }
+    }, applicationId);
+
+    const canPay = !error && payment?.configured && payment.canPay &&
+        !["Creating", "Needs Review"].includes(payment.status);
+    return (
+        <section className="status-card">
+            <h2>Service Payment</h2>
+            <p role="status">
+                {error ? "Payment status is temporarily unavailable." : payment
+                    ? `Payment status: ${payment.status}${payment.application.feePaise == null ? "" : ` · ${money(payment.application.feePaise)}`}`
+                    : "Checking payment status…"}
+            </p>
+            <p>Payment opens after approval or when processing begins, if a payable fee is set.</p>
+            <div className="status-payment-actions">
+                <Link className="status-payment-button" to={destination}>View Payment Status</Link>
+                {canPay ? <Link className="status-payment-button primary" to={destination}>Pay Fee</Link>
+                    : <button className="status-payment-button" disabled>Pay Fee</button>}
+            </div>
+        </section>
+    );
+}
+
 
 function ApplicationStatus() {
     const { id } = useParams();
@@ -282,7 +321,7 @@ function ApplicationStatus() {
                             </button>
                         </div>
 
-                        <div className="status-card"><h2>Service Payment</h2><p>Payment is available after approval when a payable fee has been assessed.</p><Link to="/payments">View Payment Status / Pay Fee →</Link></div>
+                        <ServicePayment key={application._id} applicationId={application._id} />
 
                         <ApplicationDocuments key={application._id} applicationId={application._id} />
 
